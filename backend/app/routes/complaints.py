@@ -512,7 +512,7 @@ def assign_complaint(id):
 
     is_authorized = False
     admin_id = None
-    if user.role == 'super_admin':
+    if user.role in ['admin', 'super_admin']:
         is_authorized = True
         admin = user.admin_profile
         admin_id = admin.id if admin else None
@@ -549,7 +549,7 @@ def assign_complaint(id):
         if dept and dept.code:
             d_code = dept.code.lower()
             b_code = branch.lower()
-            if d_code == b_code or (d_code == 'ce' and b_code == 'civil') or (d_code == 'civil' and b_code == 'ce'):
+            if d_code == b_code or (d_code == 'ce' and b_code == 'civil') or (d_code == 'civil' and b_code == 'ce') or ('ai' in d_code and 'ai' in b_code):
                 is_branch_match = True
     
     if not is_branch_match:

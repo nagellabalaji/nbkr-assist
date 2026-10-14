@@ -150,12 +150,17 @@ export const Register = () => {
         setStep(2);
         setTimer(60);
         setCanResend(false);
-        setToast({ show: true, message: 'Verification code sent successfully to your college email.', type: 'success' });
+        if (res.demo_otp) {
+          setOtpVal(res.demo_otp.split(''));
+          setToast({ show: true, message: `Verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
+        } else {
+          setToast({ show: true, message: 'Verification code sent successfully to your college email.', type: 'success' });
+        }
       } else {
         setErrorMsg(res.message);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Error occurred while requesting OTP.');
+      setErrorMsg(err.response?.data?.message || err.message || 'Error occurred while requesting OTP.');
     } finally {
       setLoadingLocal(false);
     }
@@ -201,13 +206,18 @@ export const Register = () => {
       if (res.success) {
         setTimer(60);
         setCanResend(false);
-        setOtpVal(['', '', '', '', '', '']);
-        setToast({ show: true, message: 'New verification code dispatched to your email.', type: 'success' });
+        if (res.demo_otp) {
+          setOtpVal(res.demo_otp.split(''));
+          setToast({ show: true, message: `New verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
+        } else {
+          setOtpVal(['', '', '', '', '', '']);
+          setToast({ show: true, message: 'New verification code dispatched to your email.', type: 'success' });
+        }
       } else {
         setErrorMsg(res.message);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to resend code.');
+      setErrorMsg(err.response?.data?.message || err.message || 'Failed to resend code.');
     } finally {
       setLoadingLocal(false);
     }

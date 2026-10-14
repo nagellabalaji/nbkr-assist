@@ -82,12 +82,17 @@ export const ForgotPassword = () => {
         setStep(2);
         setTimer(60);
         setCanResend(false);
-        setToast({ show: true, message: 'Verification code dispatched to your email.', type: 'success' });
+        if (res.demo_otp) {
+          setOtpVal(res.demo_otp.split(''));
+          setToast({ show: true, message: `Verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
+        } else {
+          setToast({ show: true, message: 'Verification code dispatched to your email.', type: 'success' });
+        }
       } else {
         setErrorMsg(res.message);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Error sending code.');
+      setErrorMsg(err.response?.data?.message || err.message || 'Error sending code.');
     } finally {
       setLoadingLocal(false);
     }

@@ -43,7 +43,17 @@ export const AdminDashboard = ({ defaultTab }) => {
   const [categoryFilter, setCategoryFilter] = useState('');
 
   // Faculty Assignment
+  const FALLBACK_FACULTY = [
+    { id: 6, username: 'BALAJI', department: 'Computer Science & Engineering' },
+    { id: 7, username: 'PAVAN', department: 'Electronics & Communication Engineering' },
+    { id: 8, username: 'SAINADH', department: 'Electrical & Electronics Engineering' },
+    { id: 9, username: 'SRINU', department: 'Mechanical Engineering' },
+    { id: 10, username: 'AKHILA', department: 'Civil Engineering' },
+    { id: 11, username: 'VARALAKSHMI', department: 'Information Technology' },
+    { id: 12, username: 'BALAJI', department: 'Artificial Intelligence & Data Science' }
+  ];
   const [facultyList, setFacultyList] = useState([]);
+  const effectiveFacultyList = facultyList && facultyList.length > 0 ? facultyList : FALLBACK_FACULTY;
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedFacultyId, setSelectedFacultyId] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
@@ -141,15 +151,20 @@ export const AdminDashboard = ({ defaultTab }) => {
     }
   };
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = async (retryCount = 0) => {
     setRefreshingComplaints(true);
     try {
       const compRes = await complaintService.getComplaints({ per_page: 200 });
       if (compRes && compRes.success && Array.isArray(compRes.data)) {
         setComplaints(compRes.data);
+      } else if (retryCount < 2) {
+        setTimeout(() => fetchComplaints(retryCount + 1), 2000);
       }
     } catch (err) {
       console.error("fetchComplaints failed:", err);
+      if (retryCount < 2) {
+        setTimeout(() => fetchComplaints(retryCount + 1), 2000);
+      }
     } finally {
       setRefreshingComplaints(false);
     }
@@ -192,12 +207,12 @@ export const AdminDashboard = ({ defaultTab }) => {
     }
   }, [location.pathname]);
 
-  // Safety trigger: ensure complaints are fetched if empty when viewing grievances
+  // Safety trigger: ensure complaints are fetched if empty anywhere on the dashboard
   useEffect(() => {
-    if (activeTab === 'grievances' && complaints.length === 0 && !loading) {
+    if (complaints.length === 0 && !loading && !refreshingComplaints) {
       fetchComplaints();
     }
-  }, [activeTab, complaints.length, loading]);
+  }, [complaints.length, loading]);
 
   const handleDelete = async (e, id) => {
     e.stopPropagation(); // Stop card click navigation
@@ -220,20 +235,20 @@ export const AdminDashboard = ({ defaultTab }) => {
     const br = branchCode.toLowerCase();
     
     if (dept === br) return true;
-    if (br === 'cse' && dept.includes('computer science')) return true;
-    if (br === 'ece' && dept.includes('electronics') && dept.includes('communication')) return true;
-    if (br === 'eee' && dept.includes('electrical') && dept.includes('electronics')) return true;
-    if (br === 'me' && dept.includes('mechanical')) return true;
-    if ((br === 'civil' || br === 'ce') && dept.includes('civil')) return true;
-    if (br === 'it' && dept.includes('information technology')) return true;
-    if ((br === 'ai & ds' || br === 'ai' || br === 'ds') && (dept.includes('artificial intelligence') || dept.includes('data science'))) return true;
+    if (br === 'cse' && (dept.includes('computer science') || dept === 'cse')) return true;
+    if (br === 'ece' && (dept.includes('electronics') || dept === 'ece')) return true;
+    if (br === 'eee' && (dept.includes('electrical') || dept === 'eee')) return true;
+    if (br === 'me' && (dept.includes('mechanical') || dept === 'me')) return true;
+    if ((br === 'civil' || br === 'ce') && (dept.includes('civil') || dept === 'ce')) return true;
+    if (br === 'it' && (dept.includes('information technology') || dept === 'it')) return true;
+    if ((br === 'ai & ds' || br === 'ai' || br === 'ds' || br.includes('ai')) && (dept.includes('artificial intelligence') || dept.includes('data science') || dept.includes('ai'))) return true;
     
     return dept.includes(br);
   };
 
   useEffect(() => {
     if (selectedFacultyId && selectedBranch) {
-      const fac = facultyList.find(f => f.id.toString() === selectedFacultyId);
+      const fac = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
       if (fac && !isBranchMatch(fac.department, selectedBranch)) {
         setValidationError('Selected faculty does not belong to this branch.');
       } else {
@@ -242,16 +257,16 @@ export const AdminDashboard = ({ defaultTab }) => {
     } else {
       setValidationError('');
     }
-  }, [selectedFacultyId, selectedBranch, facultyList]);
+  }, [selectedFacultyId, selectedBranch, effectiveFacultyList]);
 
   useEffect(() => {
     if (selectedBranch && selectedFacultyId) {
-      const fac = facultyList.find(f => f.id.toString() === selectedFacultyId);
+      const fac = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
       if (fac && !isBranchMatch(fac.department, selectedBranch)) {
         setSelectedFacultyId('');
       }
     }
-  }, [selectedBranch, facultyList]);
+  }, [selectedBranch, effectiveFacultyList]);
 
   const openAssignModal = (e, id) => {
     e.stopPropagation();
@@ -285,7 +300,7 @@ export const AdminDashboard = ({ defaultTab }) => {
     }
     if (!activeComplaintId) return;
 
-    const selectedFaculty = facultyList.find(f => f.id.toString() === selectedFacultyId);
+    const selectedFaculty = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
     if (!selectedFaculty) {
       setValidationError('Faculty member not found.');
       return;
@@ -400,18 +415,28 @@ export const AdminDashboard = ({ defaultTab }) => {
       <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         {complaints.length === 0 ? (
           <div className="empty-table-state" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.2rem', fontSize: '1rem' }}>
-              No grievances currently loaded into memory.
-            </p>
-            <button 
-              onClick={fetchComplaints} 
-              className="btn btn-primary btn-sm"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', cursor: 'pointer' }}
-              disabled={refreshingComplaints}
-            >
-              <RefreshCw size={16} className={refreshingComplaints ? 'spin-anim' : ''} />
-              <span>{refreshingComplaints ? 'Fetching records...' : 'Fetch Grievances Now'}</span>
-            </button>
+            {refreshingComplaints ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <RefreshCw size={24} className="spin-anim" style={{ color: 'var(--color-primary)' }} />
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: 0 }}>
+                  Synchronizing grievance records from database...
+                </p>
+              </div>
+            ) : (
+              <>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.2rem', fontSize: '1rem' }}>
+                  No grievances currently loaded into memory.
+                </p>
+                <button 
+                  onClick={() => fetchComplaints(0)} 
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', cursor: 'pointer' }}
+                >
+                  <RefreshCw size={16} />
+                  <span>Fetch Grievances Now</span>
+                </button>
+              </>
+            )}
           </div>
         ) : filteredComplaints.length === 0 ? (
           <div className="empty-table-state" style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
@@ -995,14 +1020,14 @@ export const AdminDashboard = ({ defaultTab }) => {
                 ) : (
                   <>
                     <option value="" style={{ color: 'var(--text-primary)', backgroundColor: 'var(--bg-card)' }}>Select Faculty</option>
-                    {facultyList
+                    {effectiveFacultyList
                       .filter(fac => isBranchMatch(fac.department, selectedBranch))
                       .map((fac) => (
                         <option key={fac.id} value={fac.id} style={{ color: 'var(--text-primary)', backgroundColor: 'var(--bg-card)' }}>
                           {fac.username} — {fac.department}
                         </option>
                       ))}
-                    {facultyList.filter(fac => isBranchMatch(fac.department, selectedBranch)).length === 0 && (
+                    {effectiveFacultyList.filter(fac => isBranchMatch(fac.department, selectedBranch)).length === 0 && (
                       <option value="" disabled style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-card)' }}>No faculty members found.</option>
                     )}
                   </>

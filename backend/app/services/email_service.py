@@ -254,7 +254,7 @@ NBKRIST Student Support & Grievance Cell
                 msg.attach(part_text)
                 msg.attach(part_html)
 
-                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
                     server.starttls()
                     server.login(smtp_username, smtp_password)
                     server.sendmail(email_from, to_email, msg.as_string())
@@ -364,7 +364,7 @@ NBKRIST Student Support & Grievance Cell
                 msg.attach(part_text)
                 msg.attach(part_html)
 
-                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
                     server.starttls()
                     server.login(smtp_username, smtp_password)
                     server.sendmail(email_from, to_email, msg.as_string())
@@ -508,7 +508,7 @@ Made by BALAJI NAGELLA
                 msg.attach(part_text)
                 msg.attach(part_html)
 
-                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
                     server.starttls()
                     server.login(smtp_username, smtp_password)
                     server.sendmail(email_from, to_email, msg.as_string())

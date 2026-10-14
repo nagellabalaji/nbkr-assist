@@ -23,7 +23,17 @@ export const ComplaintDetail = () => {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   // Admin / HOD Assignment state
+  const FALLBACK_FACULTY = [
+    { id: 6, username: 'BALAJI', department: 'Computer Science & Engineering' },
+    { id: 7, username: 'PAVAN', department: 'Electronics & Communication Engineering' },
+    { id: 8, username: 'SAINADH', department: 'Electrical & Electronics Engineering' },
+    { id: 9, username: 'SRINU', department: 'Mechanical Engineering' },
+    { id: 10, username: 'AKHILA', department: 'Civil Engineering' },
+    { id: 11, username: 'VARALAKSHMI', department: 'Information Technology' },
+    { id: 12, username: 'BALAJI', department: 'Artificial Intelligence & Data Science' }
+  ];
   const [facultyList, setFacultyList] = useState([]);
+  const effectiveFacultyList = facultyList && facultyList.length > 0 ? facultyList : FALLBACK_FACULTY;
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedFacultyId, setSelectedFacultyId] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
@@ -109,10 +119,10 @@ export const ComplaintDetail = () => {
   }, [id]);
 
   const loadFacultyList = async () => {
-    if (!['super_admin', 'hod'].includes(user?.role)) return;
+    if (!['super_admin', 'admin', 'hod'].includes(user?.role)) return;
     try {
       const res = await adminService.getFacultyList();
-      if (res.success) {
+      if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
         setFacultyList(res.data);
       }
     } catch (e) {
@@ -121,7 +131,7 @@ export const ComplaintDetail = () => {
   };
 
   useEffect(() => {
-    if (['super_admin', 'hod'].includes(user?.role)) {
+    if (['super_admin', 'admin', 'hod'].includes(user?.role)) {
       loadFacultyList();
     }
   }, [user]);
@@ -132,20 +142,20 @@ export const ComplaintDetail = () => {
     const br = branchCode.toLowerCase();
     
     if (dept === br) return true;
-    if (br === 'cse' && dept.includes('computer science')) return true;
-    if (br === 'ece' && dept.includes('electronics') && dept.includes('communication')) return true;
-    if (br === 'eee' && dept.includes('electrical') && dept.includes('electronics')) return true;
-    if (br === 'me' && dept.includes('mechanical')) return true;
-    if ((br === 'civil' || br === 'ce') && dept.includes('civil')) return true;
-    if (br === 'it' && dept.includes('information technology')) return true;
-    if ((br === 'ai & ds' || br === 'ai' || br === 'ds') && (dept.includes('artificial intelligence') || dept.includes('data science'))) return true;
+    if (br === 'cse' && (dept.includes('computer science') || dept === 'cse')) return true;
+    if (br === 'ece' && (dept.includes('electronics') || dept === 'ece')) return true;
+    if (br === 'eee' && (dept.includes('electrical') || dept === 'eee')) return true;
+    if (br === 'me' && (dept.includes('mechanical') || dept === 'me')) return true;
+    if ((br === 'civil' || br === 'ce') && (dept.includes('civil') || dept === 'ce')) return true;
+    if (br === 'it' && (dept.includes('information technology') || dept === 'it')) return true;
+    if ((br === 'ai & ds' || br === 'ai' || br === 'ds' || br.includes('ai')) && (dept.includes('artificial intelligence') || dept.includes('data science') || dept.includes('ai'))) return true;
     
     return dept.includes(br);
   };
 
   useEffect(() => {
     if (selectedFacultyId && selectedBranch) {
-      const fac = facultyList.find(f => f.id.toString() === selectedFacultyId);
+      const fac = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
       if (fac && !isBranchMatch(fac.department, selectedBranch)) {
         setValidationError('Selected faculty does not belong to this branch.');
       } else {
@@ -154,16 +164,16 @@ export const ComplaintDetail = () => {
     } else {
       setValidationError('');
     }
-  }, [selectedFacultyId, selectedBranch, facultyList]);
+  }, [selectedFacultyId, selectedBranch, effectiveFacultyList]);
 
   useEffect(() => {
     if (selectedBranch && selectedFacultyId) {
-      const fac = facultyList.find(f => f.id.toString() === selectedFacultyId);
+      const fac = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
       if (fac && !isBranchMatch(fac.department, selectedBranch)) {
         setSelectedFacultyId('');
       }
     }
-  }, [selectedBranch, facultyList]);
+  }, [selectedBranch, effectiveFacultyList]);
 
   const openAssignModal = () => {
     setSelectedFacultyId('');
@@ -171,6 +181,9 @@ export const ComplaintDetail = () => {
     setValidationError('');
     setAssignmentSuccessData(null);
     setIsAssignModalOpen(true);
+    if (!facultyList || facultyList.length === 0) {
+      loadFacultyList();
+    }
   };
 
   const handleCloseSuccessModal = () => {
@@ -194,7 +207,7 @@ export const ComplaintDetail = () => {
       return;
     }
 
-    const selectedFaculty = facultyList.find(f => f.id.toString() === selectedFacultyId);
+    const selectedFaculty = effectiveFacultyList.find(f => f.id.toString() === selectedFacultyId);
     if (!selectedFaculty) {
       setValidationError('Faculty member not found.');
       return;
@@ -300,7 +313,7 @@ export const ComplaintDetail = () => {
 
   const isStaff = ['hod', 'faculty', 'maintenance_staff', 'librarian', 'exam_cell', 'placement_officer', 'hostel_admin', 'transport_admin'].includes(user?.role);
   const isAssignedStaff = isStaff && complaint.assigned_staff_id === user.profile?.id;
-  const canAssign = ['super_admin', 'hod'].includes(user?.role);
+  const canAssign = ['super_admin', 'admin', 'hod'].includes(user?.role);
   const canResolveOrUpdate = canAssign || isAssignedStaff;
 
   return (
@@ -330,7 +343,7 @@ export const ComplaintDetail = () => {
         {/* Assign Modal Button for HOD / Admin */}
         {canAssign && (
           <button 
-            onClick={() => setIsAssignModalOpen(true)} 
+            onClick={openAssignModal} 
             className="btn btn-primary"
             disabled={complaint.status === 'Closed' || complaint.status === 'Rejected'}
           >
@@ -855,14 +868,14 @@ export const ComplaintDetail = () => {
                 ) : (
                   <>
                     <option value="" style={{ color: 'var(--text-primary)', backgroundColor: 'var(--bg-card)' }}>Select Faculty</option>
-                    {facultyList
+                    {effectiveFacultyList
                       .filter(fac => isBranchMatch(fac.department, selectedBranch))
                       .map((fac) => (
                         <option key={fac.id} value={fac.id} style={{ color: 'var(--text-primary)', backgroundColor: 'var(--bg-card)' }}>
                           {fac.username} — {fac.department}
                         </option>
                       ))}
-                    {facultyList.filter(fac => isBranchMatch(fac.department, selectedBranch)).length === 0 && (
+                    {effectiveFacultyList.filter(fac => isBranchMatch(fac.department, selectedBranch)).length === 0 && (
                       <option value="" disabled style={{ color: 'var(--text-muted)', backgroundColor: 'var(--bg-card)' }}>No faculty members found.</option>
                     )}
                   </>
