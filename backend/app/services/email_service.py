@@ -22,12 +22,12 @@ class EmailService:
             return True
 
         api_key = current_app.config.get('EMAIL_API_KEY')
-        email_from = current_app.config.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
+        email_from = current_app.config.get('EMAIL_FROM') or os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
         
-        smtp_server = current_app.config.get('SMTP_SERVER')
-        smtp_username = current_app.config.get('SMTP_USERNAME')
-        smtp_password = current_app.config.get('SMTP_PASSWORD')
-        smtp_port = current_app.config.get('SMTP_PORT', 587)
+        smtp_server = current_app.config.get('SMTP_SERVER') or os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+        smtp_username = current_app.config.get('SMTP_USERNAME') or os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
+        smtp_password = current_app.config.get('SMTP_PASSWORD') or os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
+        smtp_port = int(current_app.config.get('SMTP_PORT') or os.environ.get('SMTP_PORT', 587))
 
         # Log started event (do not log the raw OTP code!)
         method = "Unconfigured"
@@ -284,12 +284,12 @@ NBKRIST Student Support & Grievance Cell
             return True
 
         api_key = current_app.config.get('EMAIL_API_KEY')
-        email_from = current_app.config.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
+        email_from = current_app.config.get('EMAIL_FROM') or os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
         
-        smtp_server = current_app.config.get('SMTP_SERVER')
-        smtp_username = current_app.config.get('SMTP_USERNAME')
-        smtp_password = current_app.config.get('SMTP_PASSWORD')
-        smtp_port = current_app.config.get('SMTP_PORT', 587)
+        smtp_server = current_app.config.get('SMTP_SERVER') or os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+        smtp_username = current_app.config.get('SMTP_USERNAME') or os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
+        smtp_password = current_app.config.get('SMTP_PASSWORD') or os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
+        smtp_port = int(current_app.config.get('SMTP_PORT') or os.environ.get('SMTP_PORT', 587))
 
         current_app.logger.info(f"EMAIL_SEND_STARTED | To: {to_email} | Purpose: Test Email")
 

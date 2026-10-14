@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { adminService } from '../services/admin';
 import { complaintService } from '../services/complaints';
 import { Loader } from '../components/Common/Loader';
@@ -16,16 +16,18 @@ import {
 import './AdminDashboard.css';
 
 export const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [metrics, setMetrics] = useState(null);
   const [chartsData, setChartsData] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-  const navigate = useNavigate();
 
-  // New Analytics states
-  const [activeTab, setActiveTab] = useState('overview');
+  // New Analytics states - default to 'grievances' if user opened /admin-complaints
+  const [activeTab, setActiveTab] = useState(location.pathname === '/admin-complaints' ? 'grievances' : 'overview');
   const [overviewData, setOverviewData] = useState(null);
   const [attendanceData, setAttendanceData] = useState(null);
   const [modulesData, setModulesData] = useState(null);
@@ -163,6 +165,12 @@ export const AdminDashboard = () => {
     loadDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (location.pathname === '/admin-complaints') {
+      setActiveTab('grievances');
+    }
+  }, [location.pathname]);
+
   const handleDelete = async (e, id) => {
     e.stopPropagation(); // Stop card click navigation
     if (!window.confirm(`Are you sure you want to permanently delete grievance ${id}?`)) return;
@@ -283,18 +291,147 @@ export const AdminDashboard = () => {
   };
 
   const filteredComplaints = complaints.filter((comp) => {
+    const s = search.toLowerCase();
     const matchesSearch = 
-      comp.title.toLowerCase().includes(search.toLowerCase()) ||
-      comp.id.toLowerCase().includes(search.toLowerCase()) ||
-      comp.student_name.toLowerCase().includes(search.toLowerCase()) ||
-      comp.location.toLowerCase().includes(search.toLowerCase());
+      String(comp.title || '').toLowerCase().includes(s) ||
+      String(comp.id || '').toLowerCase().includes(s) ||
+      String(comp.student_name || '').toLowerCase().includes(s) ||
+      String(comp.roll_no || '').toLowerCase().includes(s) ||
+      String(comp.location || '').toLowerCase().includes(s);
 
     const matchesStatus = statusFilter ? comp.status === statusFilter : true;
     const matchesPriority = priorityFilter ? comp.ai_priority === priorityFilter : true;
-    const matchesCategory = categoryFilter ? comp.category_id.toString() === categoryFilter : true;
+    const matchesCategory = categoryFilter ? (comp.category_id && comp.category_id.toString() === categoryFilter) : true;
 
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
   });
+
+  const renderGrievanceQueueTable = () => (
+    <div className="admin-queue-card glass-card">
+      <div className="queue-header">
+        <div>
+          <h3>Grievance Administration Queue</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '4px 0 0 0' }}>
+            Showing {filteredComplaints.length} of {complaints.length} registered grievances
+          </p>
+        </div>
+        <div className="queue-actions">
+          <div className="search-bar-wrapper">
+            <Search size={16} className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Search by ID, roll, student, location..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-input search-input"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="queue-filter-row">
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="form-input">
+          <option value="">All Statuses</option>
+          <option value="Submitted">Submitted</option>
+          <option value="Under Review">Under Review</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
+          <option value="Reopened">Reopened</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="form-input">
+          <option value="">All Priorities</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Urgent">Urgent</option>
+        </select>
+
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="form-input">
+          <option value="">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        {filteredComplaints.length === 0 ? (
+          <div className="empty-table-state" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            No complaints registered matching filter criteria.
+          </div>
+        ) : (
+          <table className="custom-table" style={{ width: '100%', minWidth: '700px' }}>
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Student / Roll</th>
+                <th>Summary</th>
+                <th>Location</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Engineer Assigned</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredComplaints.map((comp) => (
+                <tr key={comp.id} onClick={() => navigate(`/complaint/${comp.id}`)} style={{ cursor: 'pointer' }}>
+                  <td><strong className="queue-id">{comp.id}</strong></td>
+                  <td>
+                    <div className="student-cell">
+                      <span className="s-name">{comp.student_name}</span>
+                      <span className="s-roll">{comp.roll_no}</span>
+                    </div>
+                  </td>
+                  <td><span className="queue-title">{comp.title}</span></td>
+                  <td><span className="queue-loc">{comp.location}</span></td>
+                  <td>{comp.category_name}</td>
+                  <td><span className={`badge badge-${(comp.ai_priority || 'medium').toLowerCase()}`}>{comp.ai_priority}</span></td>
+                  <td><span className={`badge badge-${(comp.status || 'submitted').toLowerCase().replace(' ', '')}`}>{comp.status}</span></td>
+                  <td>
+                    {comp.assigned_staff_name ? (
+                      <span className="engineer-assigned" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>{comp.assigned_staff_name}</span>
+                        {comp.assigned_branch && (
+                          <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>({comp.assigned_branch})</span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="engineer-unassigned">Unassigned</span>
+                    )}
+                  </td>
+                  <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
+                    <div className="row-actions-group">
+                      <button 
+                        onClick={(e) => openAssignModal(e, comp.id)} 
+                        className="btn btn-secondary btn-icon-only"
+                        title="Assign Faculty"
+                        disabled={comp.status === 'Closed' || comp.status === 'Rejected'}
+                      >
+                        <Wrench size={14} />
+                      </button>
+                      <button 
+                        onClick={(e) => handleDelete(e, comp.id)} 
+                        className="btn btn-danger btn-icon-only"
+                        title="Delete Ticket"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
 
   // Recharts color palettes
   const CHART_COLORS = ['#4f46e5', '#14b8a6', '#06b6d4', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
@@ -364,13 +501,21 @@ export const AdminDashboard = () => {
               <p className="metric-subtext">Faculty & support engineers</p>
             </div>
 
-            <div className="metric-card glass-card border-orange">
+            <div 
+              className="metric-card glass-card border-orange"
+              onClick={() => setActiveTab('grievances')}
+              style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+              title="Click to view Grievances Queue"
+            >
               <div className="metric-header">
                 <span className="metric-title">Open Tickets</span>
                 <AlertTriangle className="metric-icon orange" size={20} />
               </div>
               <div className="metric-number">{overviewData.open_grievances}</div>
-              <p className="metric-subtext">Resolved: {overviewData.resolved_grievances}</p>
+              <p className="metric-subtext" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Resolved: {overviewData.resolved_grievances}</span>
+                <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>View Queue &rarr;</span>
+              </p>
             </div>
 
             <div className="metric-card glass-card border-green">
@@ -383,7 +528,7 @@ export const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="dashboard-grid" style={{ marginTop: '20px' }}>
+          <div className="dashboard-grid" style={{ marginTop: '20px', marginBottom: '30px' }}>
             <div className="metric-card glass-card">
               <h3>Hostel Requests</h3>
               <div className="metric-number" style={{ fontSize: '1.8rem', marginTop: '10px' }}>{overviewData.total_hostel}</div>
@@ -400,6 +545,11 @@ export const AdminDashboard = () => {
               <h3>Total Examinations</h3>
               <div className="metric-number" style={{ fontSize: '1.8rem', marginTop: '10px' }}>{overviewData.total_exams}</div>
             </div>
+          </div>
+
+          {/* Grievance Administration Queue directly visible on Overview tab */}
+          <div style={{ marginTop: '20px' }}>
+            {renderGrievanceQueueTable()}
           </div>
         </div>
       )}
@@ -580,123 +730,7 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Complaints Administration Log Table */}
-          <div className="admin-queue-card glass-card">
-            <div className="queue-header">
-              <h3>Grievance Administration Queue</h3>
-              <div className="queue-actions">
-                <div className="search-bar-wrapper">
-                  <Search size={16} className="search-icon" />
-                  <input 
-                    type="text" 
-                    placeholder="Search logs..." 
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="form-input search-input"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="queue-filter-row">
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="form-input">
-                <option value="">All Statuses</option>
-                <option value="Submitted">Submitted</option>
-                <option value="Under Review">Under Review</option>
-                <option value="Assigned">Assigned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-                <option value="Reopened">Reopened</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-
-              <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="form-input">
-                <option value="">All Priorities</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-
-              <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="form-input">
-                <option value="">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="table-container">
-              {filteredComplaints.length === 0 ? (
-                <div className="empty-table-state">No complaints registered matching filter criteria.</div>
-              ) : (
-                <table className="custom-table">
-                  <thead>
-                    <tr>
-                      <th>Ticket ID</th>
-                      <th>Student / Roll</th>
-                      <th>Summary</th>
-                      <th>Location</th>
-                      <th>Category</th>
-                      <th>Priority</th>
-                      <th>Status</th>
-                      <th>Engineer Assigned</th>
-                      <th style={{ textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredComplaints.map((comp) => (
-                      <tr key={comp.id} onClick={() => navigate(`/complaint/${comp.id}`)} style={{ cursor: 'pointer' }}>
-                        <td><strong className="queue-id">{comp.id}</strong></td>
-                        <td>
-                          <div className="student-cell">
-                            <span className="s-name">{comp.student_name}</span>
-                            <span className="s-roll">{comp.roll_no}</span>
-                          </div>
-                        </td>
-                        <td><span className="queue-title">{comp.title}</span></td>
-                        <td><span className="queue-loc">{comp.location}</span></td>
-                        <td>{comp.category_name}</td>
-                        <td><span className={`badge badge-${comp.ai_priority.toLowerCase()}`}>{comp.ai_priority}</span></td>
-                        <td><span className={`badge badge-${comp.status.toLowerCase().replace(' ', '')}`}>{comp.status}</span></td>
-                        <td>
-                          {comp.assigned_staff_name ? (
-                            <span className="engineer-assigned" style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span>{comp.assigned_staff_name}</span>
-                              {comp.assigned_branch && (
-                                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>({comp.assigned_branch})</span>
-                              )}
-                            </span>
-                          ) : (
-                            <span className="engineer-unassigned">Unassigned</span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
-                          <div className="row-actions-group">
-                            <button 
-                              onClick={(e) => openAssignModal(e, comp.id)} 
-                              className="btn btn-secondary btn-icon-only"
-                              title="Assign Faculty"
-                              disabled={comp.status === 'Closed' || comp.status === 'Rejected'}
-                            >
-                              <Wrench size={14} />
-                            </button>
-                            <button 
-                              onClick={(e) => handleDelete(e, comp.id)} 
-                              className="btn btn-danger btn-icon-only"
-                              title="Delete Ticket"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+          {renderGrievanceQueueTable()}
         </div>
       )}
 

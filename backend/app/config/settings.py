@@ -36,16 +36,16 @@ class Config:
 
     # Email & OTP configurations
     EMAIL_API_KEY = os.environ.get('EMAIL_API_KEY', None)
-    EMAIL_FROM = os.environ.get('EMAIL_FROM', 'noreply@campusfix.ai')
+    EMAIL_FROM = os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
     OTP_EXPIRY_MINUTES = int(os.environ.get('OTP_EXPIRY_MINUTES', 5))
     OTP_RESEND_COOLDOWN = int(os.environ.get('OTP_RESEND_COOLDOWN', 60))
     
     # SMTP fallback configurations
-    SMTP_SERVER = os.environ.get('SMTP_SERVER', None)
+    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-    SMTP_USERNAME = os.environ.get('SMTP_USERNAME', None)
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', None)
+    SMTP_USERNAME = os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
 
     # Google OAuth 2.0 configurations
-    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', None)
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '613136878082-3smuudupve843groiq4fhkvmkblqit9p.apps.googleusercontent.com')
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', None)

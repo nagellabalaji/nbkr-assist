@@ -29,15 +29,15 @@ services:
         value: 613136878082-3smuudupve843groiq4fhkvmkblqit9p.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: MAIL_SERVER
+      - key: SMTP_SERVER
         value: smtp.gmail.com
-      - key: MAIL_PORT
+      - key: SMTP_PORT
         value: 587
-      - key: MAIL_USERNAME
-        sync: false
-      - key: MAIL_PASSWORD
-        sync: false
-      - key: MAIL_DEFAULT_SENDER
-        sync: false
+      - key: SMTP_USERNAME
+        value: startupwithus2932@gmail.com
+      - key: SMTP_PASSWORD
+        value: daqkbmxqmwofslsh
+      - key: EMAIL_FROM
+        value: startupwithus2932@gmail.com
       - key: GEMINI_API_KEY
         sync: false
