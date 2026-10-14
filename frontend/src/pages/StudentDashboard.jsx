@@ -84,29 +84,35 @@ export const StudentDashboard = () => {
   }, []);
 
   const getStatusClass = (status) => {
-    return `badge-${status.toLowerCase().replace(' ', '')}`;
+    return `badge-${(status ? String(status) : 'unknown').toLowerCase().replace(/\s+/g, '')}`;
   };
 
   const getPriorityClass = (priority) => {
-    return `badge-${priority.toLowerCase()}`;
+    return `badge-${(priority ? String(priority) : 'low').toLowerCase()}`;
   };
 
-  // Filter grievances list client-side
-  const filteredGrievances = grievances.filter((g) => {
+  // Filter grievances list client-side safely
+  const filteredGrievances = (Array.isArray(grievances) ? grievances : []).filter((g) => {
+    if (!g) return false;
+    const searchLower = (search || '').toLowerCase();
+    const title = (g.title || '').toLowerCase();
+    const idStr = String(g.id ?? '').toLowerCase();
+    const desc = (g.description || '').toLowerCase();
+    const loc = (g.location || '').toLowerCase();
     const matchesSearch = 
-      g.title.toLowerCase().includes(search.toLowerCase()) || 
-      g.id.toLowerCase().includes(search.toLowerCase()) ||
-      g.description.toLowerCase().includes(search.toLowerCase()) ||
-      g.location.toLowerCase().includes(search.toLowerCase());
+      title.includes(searchLower) || 
+      idStr.includes(searchLower) ||
+      desc.includes(searchLower) ||
+      loc.includes(searchLower);
 
     const matchesStatus = statusFilter ? g.status === statusFilter : true;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     if (sortField === 'created_at') {
-      return new Date(b.created_at) - new Date(a.created_at);
+      return new Date(b?.created_at || 0) - new Date(a?.created_at || 0);
     }
     const priorityWeight = { 'Urgent': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
-    return priorityWeight[b.ai_priority] - priorityWeight[a.ai_priority];
+    return (priorityWeight[b?.ai_priority] || 0) - (priorityWeight[a?.ai_priority] || 0);
   });
 
   if (loading) {

@@ -35,6 +35,7 @@ import { LibrarianDashboard } from './pages/LibrarianDashboard';
 import { StudentPlacements } from './pages/StudentPlacements';
 import { PlacementOfficerDashboard } from './pages/PlacementOfficerDashboard';
 import Loader from './components/Common/Loader';
+import ErrorBoundary from './components/Common/ErrorBoundary';
 
 // Protected Route Wrapper Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -63,7 +64,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   // Wrap standard dashboards and sub-pages in DashboardLayout frame
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <DashboardLayout>
+      <ErrorBoundary message="An error occurred while loading this dashboard view.">
+        {children}
+      </ErrorBoundary>
+    </DashboardLayout>
+  );
 };
 
 // Root Router Dispatches
