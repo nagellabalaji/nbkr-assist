@@ -57,6 +57,16 @@ def create_app(config_class=Config):
     app.register_blueprint(library_bp, url_prefix='/api/library')
     app.register_blueprint(placement_bp, url_prefix='/api/placements')
 
+    # Health check & root status endpoints
+    @app.route('/')
+    @app.route('/health')
+    def health_check():
+        return jsonify({
+            'status': 'healthy',
+            'service': 'NBKR Assist API',
+            'version': '1.0.0'
+        }), 200
+
     # Register custom JWT error handlers
     @jwt.expired_token_loader
     def my_expired_token_callback(jwt_header, jwt_payload):
