@@ -280,9 +280,9 @@ def create_complaint():
 def get_complaints():
     """Retrieves all grievances with role-based visibility, query searches, and pagination."""
     claims = get_jwt()
-    role = claims.get('role')
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
+    role = (user.role if user else None) or claims.get('role')
 
     query = Complaint.query
 

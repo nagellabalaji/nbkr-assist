@@ -14,7 +14,7 @@ admin_bp = Blueprint('admin', __name__)
 def get_analytics():
     """Aggregates system-wide analytics metrics for the Admin Dashboard."""
     claims = get_jwt()
-    if claims.get('role') != 'super_admin':
+    if claims.get('role') not in ['admin', 'super_admin']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin access required.', 'error': 'forbidden'}), 403
 
     try:
@@ -113,11 +113,11 @@ def get_staff_list():
     role = claims.get('role')
     user_id = int(get_jwt_identity())
     
-    if role not in ['super_admin', 'hod']:
+    if role not in ['admin', 'super_admin', 'hod']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin or HOD access required.', 'error': 'forbidden'}), 403
 
     try:
-        if role == 'super_admin':
+        if role in ['admin', 'super_admin']:
             staff_members = Staff.query.all()
         else:
             # HOD role filters staff in their same department
@@ -143,7 +143,7 @@ def get_faculty_list():
     role = claims.get('role')
     user_id = int(get_jwt_identity())
     
-    if role not in ['super_admin', 'hod']:
+    if role not in ['admin', 'super_admin', 'hod']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin or HOD access required.', 'error': 'forbidden'}), 403
 
     try:
@@ -169,11 +169,11 @@ def get_faculty_list():
 def get_users_list():
     """Fetches a list of all students and staff members in the system."""
     claims = get_jwt()
-    if claims.get('role') != 'super_admin':
+    if claims.get('role') not in ['admin', 'super_admin']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin access required.', 'error': 'forbidden'}), 403
 
     try:
-        users = User.query.filter(User.role != 'super_admin').order_by(User.id.desc()).all()
+        users = User.query.filter(~User.role.in_(['admin', 'super_admin'])).order_by(User.id.desc()).all()
         users_list = []
         for u in users:
             profile = {}
@@ -205,14 +205,14 @@ def get_users_list():
 def update_user_status(id):
     """Admin-only status toggle (active/inactive) to freeze accounts."""
     claims = get_jwt()
-    if claims.get('role') != 'super_admin':
+    if claims.get('role') not in ['admin', 'super_admin']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin access required.', 'error': 'forbidden'}), 403
 
     user = User.query.get(id)
     if not user:
         return jsonify({'success': False, 'message': 'User not found', 'error': 'not_found'}), 404
 
-    if user.role == 'super_admin':
+    if user.role in ['admin', 'super_admin']:
          return jsonify({'success': False, 'message': 'Cannot modify Admin accounts', 'error': 'bad_request'}), 400
 
     data = request.get_json() or {}
@@ -454,7 +454,7 @@ def get_analytics_modules():
 @jwt_required()
 def trigger_reminders():
     claims = get_jwt()
-    if claims.get('role') != 'super_admin':
+    if claims.get('role') not in ['admin', 'super_admin']:
         return jsonify({'success': False, 'message': 'Forbidden. Admin access required.', 'error': 'forbidden'}), 403
 
     from app.services.reminder_service import ReminderService

@@ -130,7 +130,7 @@ export const LodgeComplaint = () => {
     }
 
     // Resolve category name to ID
-    const categoryObj = categoriesList.find(c => c.name.toLowerCase() === selectedCategoryName.toLowerCase());
+    const categoryObj = categoriesList.find(c => c.name.toLowerCase() === selectedCategoryName.toLowerCase()) || categoriesList[0];
     if (!categoryObj) {
       setToast({ show: true, message: 'Invalid category selection.', type: 'error' });
       return;
