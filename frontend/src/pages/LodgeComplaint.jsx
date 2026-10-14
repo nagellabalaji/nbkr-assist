@@ -37,14 +37,20 @@ export const LodgeComplaint = () => {
   useEffect(() => {
     const fetchCatsAndSchema = async () => {
       try {
-        // Fetch both category objects (IDs + names) and subcategory mappings
+        // Fetch both category objects (IDs + names) and subcategory mappings with independent fallbacks
         const [catsRes, schemaRes] = await Promise.all([
-          complaintService.getCategories(),
-          complaintService.getCategoriesSchema()
+          complaintService.getCategories().catch((err) => { console.error("Failed to load categories:", err); return null; }),
+          complaintService.getCategoriesSchema().catch((err) => { console.error("Failed to load schema:", err); return null; })
         ]);
         
-        if (catsRes.success && schemaRes.success) {
+        if (catsRes && catsRes.success && catsRes.data) {
           setCategoriesList(catsRes.data);
+          if (!selectedCategoryName && catsRes.data.length > 0) {
+            setSelectedCategoryName(catsRes.data[0].name);
+          }
+        }
+
+        if (schemaRes && schemaRes.success && schemaRes.data) {
           setCategoriesSchema(schemaRes.data);
           
           const firstCat = Object.keys(schemaRes.data)[0];
@@ -130,9 +136,21 @@ export const LodgeComplaint = () => {
     }
 
     // Resolve category name to ID
-    const categoryObj = categoriesList.find(c => c.name.toLowerCase() === selectedCategoryName.toLowerCase()) || categoriesList[0];
+    let categoryObj = categoriesList.find(c => c.name.toLowerCase() === selectedCategoryName.toLowerCase()) || categoriesList[0];
     if (!categoryObj) {
-      setToast({ show: true, message: 'Invalid category selection.', type: 'error' });
+      try {
+        const catRes = await complaintService.getCategories();
+        if (catRes && catRes.success && catRes.data && catRes.data.length > 0) {
+          setCategoriesList(catRes.data);
+          categoryObj = catRes.data.find(c => c.name.toLowerCase() === selectedCategoryName.toLowerCase()) || catRes.data[0];
+        }
+      } catch (err) {
+        console.error("Dynamic category recovery failed:", err);
+      }
+    }
+
+    if (!categoryObj) {
+      setToast({ show: true, message: 'Invalid category selection. Please select a valid grievance category.', type: 'error' });
       return;
     }
 

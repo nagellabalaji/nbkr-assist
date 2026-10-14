@@ -95,31 +95,21 @@ export const AdminDashboard = () => {
         adminService.getFacultyList().catch((err) => { console.error("getFacultyList failed:", err); return null; })
       ]);
 
-      let essentialFailed = false;
-
-      if (analyticsRes && analyticsRes.success) {
-        setMetrics(analyticsRes.data.metrics);
-        setChartsData(analyticsRes.data.charts);
-      } else {
-        essentialFailed = true;
+      if (analyticsRes && analyticsRes.success && analyticsRes.data) {
+        setMetrics(analyticsRes.data.metrics || null);
+        setChartsData(analyticsRes.data.charts || null);
       }
 
       if (overviewRes && overviewRes.success) {
         setOverviewData(overviewRes.data);
-      } else {
-        essentialFailed = true;
       }
 
       if (attendanceRes && attendanceRes.success) {
         setAttendanceData(attendanceRes.data);
-      } else {
-        essentialFailed = true;
       }
 
       if (modulesRes && modulesRes.success) {
         setModulesData(modulesRes.data);
-      } else {
-        essentialFailed = true;
       }
       
       if (compRes && compRes.success) setComplaints(compRes.data);
@@ -129,7 +119,8 @@ export const AdminDashboard = () => {
         setFacultyList(facultyRes.data);
       }
 
-      if (essentialFailed) {
+      // Only trigger fatal error if BOTH analytics AND complaints failed entirely
+      if ((!analyticsRes || !analyticsRes.success) && (!compRes || !compRes.success)) {
         setError("Failed to fetch essential telemetry datasets. Please ensure that all API services are active.");
       }
     } catch (e) {
