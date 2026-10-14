@@ -40,6 +40,7 @@ export const Register = () => {
   // OTP Verification States
   const [step, setStep] = useState(1); // 1 = Registration details, 2 = OTP check
   const [otpVal, setOtpVal] = useState(['', '', '', '', '', '']);
+  const [receivedOtp, setReceivedOtp] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const otpInputsRef = useRef([]);
@@ -151,9 +152,11 @@ export const Register = () => {
         setTimer(60);
         setCanResend(false);
         if (res.demo_otp) {
+          setReceivedOtp(res.demo_otp);
           setOtpVal(res.demo_otp.split(''));
           setToast({ show: true, message: `Verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
         } else {
+          setReceivedOtp('');
           setToast({ show: true, message: 'Verification code sent successfully to your college email.', type: 'success' });
         }
       } else {
@@ -207,9 +210,11 @@ export const Register = () => {
         setTimer(60);
         setCanResend(false);
         if (res.demo_otp) {
+          setReceivedOtp(res.demo_otp);
           setOtpVal(res.demo_otp.split(''));
           setToast({ show: true, message: `New verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
         } else {
+          setReceivedOtp('');
           setOtpVal(['', '', '', '', '', '']);
           setToast({ show: true, message: 'New verification code dispatched to your email.', type: 'success' });
         }
@@ -508,6 +513,27 @@ export const Register = () => {
                 <h2>Email Verification Required</h2>
                 <p>A cryptographically secure 6-digit OTP verification code has been dispatched to: <strong style={{ color: 'var(--secondary-hover)' }}>{email}</strong></p>
               </div>
+
+              {receivedOtp && (
+                <div style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid #10b981',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  marginBottom: '20px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '0.85rem', color: '#047857', fontWeight: '600' }}>
+                    Instant Verification Code (Auto-Detected):
+                  </div>
+                  <div style={{ fontSize: '2.25rem', fontWeight: '800', letterSpacing: '8px', color: '#047857', margin: '4px 0' }}>
+                    {receivedOtp}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#065f46' }}>
+                    Your code is auto-filled below. Click &quot;Verify &amp; Create Account&quot; to complete registration!
+                  </div>
+                </div>
+              )}
 
               {errorMsg && <div className="auth-error-banner">{errorMsg}</div>}
 
