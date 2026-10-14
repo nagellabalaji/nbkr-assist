@@ -24,9 +24,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        value: mysql+pymysql://sql12838873:ynwhwp3Ebq@sql12.freesqldatabase.com:3306/sql12838873
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        value: 613136878082-3smuudupve843groiq4fhkvmkblqit9p.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: MAIL_SERVER
