@@ -37,8 +37,9 @@ api.interceptors.response.use(
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         // Force redirect to login page (unless already there)
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-          window.location.href = '/login?expired=true';
+        const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+        if (!window.location.pathname.endsWith('/login') && !window.location.pathname.endsWith('/register')) {
+          window.location.href = `${base}/login?expired=true`;
         }
       }
     }
