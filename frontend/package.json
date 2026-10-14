@@ -9,8 +9,8 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "npm run build && node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
+    "deploy": "gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "axios": "^1.19.0",
