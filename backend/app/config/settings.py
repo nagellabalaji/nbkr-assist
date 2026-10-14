@@ -12,8 +12,10 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'default-jwt-secret-key-98765')
     
     # Database
-    _raw_db_url = os.environ.get('DATABASE_URL', 'mysql+pymysql://sql12838873:ynwhwp3Ebq@sql12.freesqldatabase.com:3306/sql12838873')
-    if _raw_db_url and _raw_db_url.startswith('postgres://'):
+    _raw_db_url = os.environ.get('DATABASE_URL', '')
+    if not _raw_db_url or '@host' in _raw_db_url or 'your_' in _raw_db_url or (os.environ.get('FLASK_ENV') == 'production' and 'localhost' in _raw_db_url):
+        _raw_db_url = 'mysql+pymysql://sql12838873:ynwhwp3Ebq@sql12.freesqldatabase.com:3306/sql12838873'
+    if _raw_db_url.startswith('postgres://'):
         _raw_db_url = _raw_db_url.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = _raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
