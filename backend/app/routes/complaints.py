@@ -349,11 +349,11 @@ def get_complaints():
         query = query.order_by(getattr(Complaint, sort_by).desc())
 
     try:
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
+        page = max(1, int(request.args.get('page', 1)))
+        per_page = min(500, max(1, int(request.args.get('per_page', 100))))
     except ValueError:
         page = 1
-        per_page = 10
+        per_page = 100
 
     total_count = query.count()
     paginated = query.offset((page - 1) * per_page).limit(per_page).all()

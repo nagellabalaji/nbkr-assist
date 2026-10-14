@@ -125,7 +125,7 @@ const AppRoutes = () => {
         path="/admin-dashboard" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
-            <AdminDashboard />
+            <AdminDashboard key="admin-dashboard" defaultTab="overview" />
           </ProtectedRoute>
         } 
       />
@@ -133,7 +133,7 @@ const AppRoutes = () => {
         path="/admin-complaints" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
-            <AdminDashboard /> {/* Re-uses dashboard queue filters */}
+            <AdminDashboard key="admin-complaints" defaultTab="grievances" />
           </ProtectedRoute>
         } 
       />

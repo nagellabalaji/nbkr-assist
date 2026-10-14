@@ -11,11 +11,11 @@ import {
 } from 'recharts';
 import { 
   FileText, Clock, AlertTriangle, CheckCircle, Trash2, 
-  Search, ShieldAlert, Award, Star, Wrench, User, GraduationCap
+  Search, ShieldAlert, Award, Star, Wrench, User, GraduationCap, RefreshCw
 } from 'lucide-react';
 import './AdminDashboard.css';
 
-export const AdminDashboard = () => {
+export const AdminDashboard = ({ defaultTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,10 +24,13 @@ export const AdminDashboard = () => {
   const [complaints, setComplaints] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingComplaints, setRefreshingComplaints] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // New Analytics states - default to 'grievances' if user opened /admin-complaints
-  const [activeTab, setActiveTab] = useState(location.pathname === '/admin-complaints' ? 'grievances' : 'overview');
+  // New Analytics states - prioritize defaultTab prop or route
+  const [activeTab, setActiveTab] = useState(
+    defaultTab || (location.pathname === '/admin-complaints' ? 'grievances' : 'overview')
+  );
   const [overviewData, setOverviewData] = useState(null);
   const [attendanceData, setAttendanceData] = useState(null);
   const [modulesData, setModulesData] = useState(null);
@@ -92,7 +95,7 @@ export const AdminDashboard = () => {
         adminService.getAnalyticsOverview().catch((err) => { console.error("getAnalyticsOverview failed:", err); return null; }),
         adminService.getAnalyticsAttendance().catch((err) => { console.error("getAnalyticsAttendance failed:", err); return null; }),
         adminService.getAnalyticsModules().catch((err) => { console.error("getAnalyticsModules failed:", err); return null; }),
-        complaintService.getComplaints().catch((err) => { console.error("getComplaints failed:", err); return null; }),
+        complaintService.getComplaints({ per_page: 200 }).catch((err) => { console.error("getComplaints failed:", err); return null; }),
         complaintService.getCategories().catch((err) => { console.error("getCategories failed:", err); return null; }),
         adminService.getFacultyList().catch((err) => { console.error("getFacultyList failed:", err); return null; })
       ]);
@@ -114,10 +117,14 @@ export const AdminDashboard = () => {
         setModulesData(modulesRes.data);
       }
       
-      if (compRes && compRes.success) setComplaints(compRes.data);
-      if (catRes && catRes.success) setCategories(catRes.data);
+      if (compRes && compRes.success && Array.isArray(compRes.data)) {
+        setComplaints(compRes.data);
+      }
+      if (catRes && catRes.success && Array.isArray(catRes.data)) {
+        setCategories(catRes.data);
+      }
       
-      if (facultyRes && facultyRes.success) {
+      if (facultyRes && facultyRes.success && Array.isArray(facultyRes.data)) {
         setFacultyList(facultyRes.data);
       }
 
@@ -134,6 +141,20 @@ export const AdminDashboard = () => {
     }
   };
 
+  const fetchComplaints = async () => {
+    setRefreshingComplaints(true);
+    try {
+      const compRes = await complaintService.getComplaints({ per_page: 200 });
+      if (compRes && compRes.success && Array.isArray(compRes.data)) {
+        setComplaints(compRes.data);
+      }
+    } catch (err) {
+      console.error("fetchComplaints failed:", err);
+    } finally {
+      setRefreshingComplaints(false);
+    }
+  };
+
   const refreshDashboardData = async () => {
     try {
       const [analyticsRes, overviewRes, attendanceRes, modulesRes, compRes, catRes, facultyRes] = await Promise.all([
@@ -141,7 +162,7 @@ export const AdminDashboard = () => {
         adminService.getAnalyticsOverview().catch(() => null),
         adminService.getAnalyticsAttendance().catch(() => null),
         adminService.getAnalyticsModules().catch(() => null),
-        complaintService.getComplaints().catch(() => null),
+        complaintService.getComplaints({ per_page: 200 }).catch(() => null),
         complaintService.getCategories().catch(() => null),
         adminService.getFacultyList().catch(() => null)
       ]);
@@ -153,9 +174,9 @@ export const AdminDashboard = () => {
       if (overviewRes && overviewRes.success) setOverviewData(overviewRes.data);
       if (attendanceRes && attendanceRes.success) setAttendanceData(attendanceRes.data);
       if (modulesRes && modulesRes.success) setModulesData(modulesRes.data);
-      if (compRes && compRes.success) setComplaints(compRes.data);
-      if (catRes && catRes.success) setCategories(catRes.data);
-      if (facultyRes && facultyRes.success) setFacultyList(facultyRes.data);
+      if (compRes && compRes.success && Array.isArray(compRes.data)) setComplaints(compRes.data);
+      if (catRes && catRes.success && Array.isArray(catRes.data)) setCategories(catRes.data);
+      if (facultyRes && facultyRes.success && Array.isArray(facultyRes.data)) setFacultyList(facultyRes.data);
     } catch (e) {
       console.error("Background refresh failed:", e);
     }
@@ -170,6 +191,13 @@ export const AdminDashboard = () => {
       setActiveTab('grievances');
     }
   }, [location.pathname]);
+
+  // Safety trigger: ensure complaints are fetched if empty when viewing grievances
+  useEffect(() => {
+    if (activeTab === 'grievances' && complaints.length === 0 && !loading) {
+      fetchComplaints();
+    }
+  }, [activeTab, complaints.length, loading]);
 
   const handleDelete = async (e, id) => {
     e.stopPropagation(); // Stop card click navigation
@@ -315,7 +343,18 @@ export const AdminDashboard = () => {
             Showing {filteredComplaints.length} of {complaints.length} registered grievances
           </p>
         </div>
-        <div className="queue-actions">
+        <div className="queue-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            type="button" 
+            onClick={fetchComplaints} 
+            className="btn btn-secondary btn-sm"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', padding: '7px 12px', fontSize: '0.85rem' }}
+            title="Refresh Grievances Queue"
+            disabled={refreshingComplaints}
+          >
+            <RefreshCw size={14} className={refreshingComplaints ? 'spin-anim' : ''} />
+            <span>{refreshingComplaints ? 'Refreshing...' : 'Refresh Queue'}</span>
+          </button>
           <div className="search-bar-wrapper">
             <Search size={16} className="search-icon" />
             <input 
@@ -359,8 +398,23 @@ export const AdminDashboard = () => {
       </div>
 
       <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        {filteredComplaints.length === 0 ? (
-          <div className="empty-table-state" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        {complaints.length === 0 ? (
+          <div className="empty-table-state" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.2rem', fontSize: '1rem' }}>
+              No grievances currently loaded into memory.
+            </p>
+            <button 
+              onClick={fetchComplaints} 
+              className="btn btn-primary btn-sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', cursor: 'pointer' }}
+              disabled={refreshingComplaints}
+            >
+              <RefreshCw size={16} className={refreshingComplaints ? 'spin-anim' : ''} />
+              <span>{refreshingComplaints ? 'Fetching records...' : 'Fetch Grievances Now'}</span>
+            </button>
+          </div>
+        ) : filteredComplaints.length === 0 ? (
+          <div className="empty-table-state" style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
             No complaints registered matching filter criteria.
           </div>
         ) : (
