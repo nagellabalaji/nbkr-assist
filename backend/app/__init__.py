@@ -57,14 +57,26 @@ def create_app(config_class=Config):
     app.register_blueprint(library_bp, url_prefix='/api/library')
     app.register_blueprint(placement_bp, url_prefix='/api/placements')
 
-    # Health check & root status endpoints
     @app.route('/')
     @app.route('/health')
     def health_check():
+        db_status = "ok"
+        db_error = None
+        try:
+            db.session.execute(db.text('SELECT 1'))
+        except Exception as e:
+            db_status = "error"
+            db_error = str(e)
+
         return jsonify({
-            'status': 'healthy',
+            'status': 'healthy' if db_status == 'ok' else 'degraded',
             'service': 'NBKR Assist API',
-            'version': '1.0.0'
+            'version': '1.0.2',
+            'database': {
+                'status': db_status,
+                'error': db_error,
+                'uri_host': str(app.config.get('SQLALCHEMY_DATABASE_URI', '')).split('@')[-1] if '@' in str(app.config.get('SQLALCHEMY_DATABASE_URI', '')) else 'hidden'
+            }
         }), 200
 
     # Register custom JWT error handlers
@@ -126,11 +138,12 @@ def create_app(config_class=Config):
         }), 404
 
     @app.errorhandler(500)
+    @app.errorhandler(Exception)
     def internal_error(error):
         return jsonify({
             'success': False,
             'message': 'Internal Server Error',
-            'error': str(error)
+            'error': getattr(error, 'description', str(error))
         }), 500
 
     return app
