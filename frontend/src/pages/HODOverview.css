@@ -1,0 +1,102 @@
+.hod-overview-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.overview-header {
+  margin-bottom: 2rem;
+}
+
+.overview-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.overview-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.overview-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.overview-brand-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+}
+
+.banner-logo {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-titles h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.banner-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.overview-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  padding: 2.5rem 2rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.detail-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--color-primary);
+}
+
+.detail-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .overview-brand-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,0 +1,204 @@
+.student-library-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.library-header {
+  margin-bottom: 2rem;
+}
+
+.library-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.library-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.library-layout-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.search-box-wrapper {
+  padding: 1rem;
+  border-radius: 8px;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 3rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.book-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+}
+
+.book-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.book-isbn {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.book-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-grow: 1;
+}
+
+.book-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.book-author, .book-location {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.book-availability-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.stock-label {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.stock-value {
+  font-weight: 700;
+}
+
+.stock-value.green {
+  color: var(--color-resolved);
+}
+
+.stock-value.red {
+  color: var(--color-error);
+}
+
+.book-card-actions {
+  margin-top: 1rem;
+}
+
+.borrow-btn, .return-btn {
+  width: 100%;
+}
+
+.loans-section {
+  padding: 1.5rem;
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.loans-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.loans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loan-item-card {
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.loan-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.loan-type {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.loan-book-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.loan-book-author {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.loan-dates-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  border-top: 1px dashed var(--color-border);
+  padding-top: 0.5rem;
+}
+
+.due-date {
+  color: var(--color-error);
+}
+
+@media (max-width: 992px) {
+  .library-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}

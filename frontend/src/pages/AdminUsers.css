@@ -1,0 +1,195 @@
+/* Admin Users Directory Page CSS */
+
+.admin-users-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.users-header-section {
+  margin-bottom: 30px;
+}
+
+.users-header-section h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.users-header-section p {
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Controls */
+.users-controls-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.role-filter-dropdown.form-input {
+  width: auto;
+  min-width: 160px;
+  cursor: pointer;
+}
+
+/* Users Grid Cards */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.user-profile-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  height: 290px;
+  transition: var(--transition-smooth);
+}
+
+.user-profile-card:hover {
+  border-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.role-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--secondary-hover);
+  background: rgba(20, 184, 166, 0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background-color: var(--color-resolved);
+  box-shadow: 0 0 6px var(--color-resolved);
+}
+
+.status-dot.inactive {
+  background-color: var(--color-rejected);
+  box-shadow: 0 0 6px var(--color-rejected);
+}
+
+.card-body-details {
+  margin-top: 14px;
+  flex: 1;
+}
+
+.card-body-details h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.email-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-attributes {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 12px;
+}
+
+.attribute-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.attr-lbl {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.attr-val {
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.card-action-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.status-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.status-label strong {
+  color: var(--text-primary);
+}
+
+.empty-users {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .users-controls-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .role-filter-dropdown.form-input {
+    min-width: 100%;
+  }
+}

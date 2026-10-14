@@ -1,0 +1,21 @@
+# Node/Vite Ignore
+node_modules/
+dist/
+dist-ssr/
+*.local
+.DS_Store
+
+# Python Ignore
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+*.env
+
+# Database logs / local uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+database/*.log
+database/*.local

@@ -1,0 +1,221 @@
+.student-hostel-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hostel-header {
+  margin-bottom: 2rem;
+}
+
+.hostel-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.hostel-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.dayscholar-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  gap: 1.25rem;
+}
+
+.lock-icon {
+  color: var(--color-error);
+}
+
+.dayscholar-lock h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dayscholar-lock p {
+  max-width: 500px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.hosteller-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+.room-info-card {
+  padding: 1.75rem;
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title-row h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.info-icon {
+  color: var(--color-primary);
+}
+
+.room-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.detail-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-box .lbl {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.detail-box .val {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.detail-box .val.green {
+  color: var(--color-resolved);
+}
+
+.raise-req-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.requests-history {
+  padding: 1.75rem;
+  border-radius: 12px;
+}
+
+.requests-history h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.empty-requests {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.requests-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.request-timeline-item {
+  padding: 1.25rem;
+  border-radius: 10px;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.item-type {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-primary);
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-submitted {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.status-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-resolved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.item-desc {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.admin-notes-box {
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.item-date {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* Form Modals */
+.hostel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .hosteller-layout {
+    grid-template-columns: 1fr;
+  }
+}

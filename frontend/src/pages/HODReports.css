@@ -1,0 +1,162 @@
+.hod-reports-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.reports-header {
+  margin-bottom: 2rem;
+}
+
+.reports-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.reports-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.report-select-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.report-selectors {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.selector-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.selector-btn.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background-color: var(--color-resolved);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.print-btn:hover {
+  transform: scale(1.02);
+}
+
+.report-workspace {
+  padding: 2.5rem;
+  border-radius: 16px;
+}
+
+.report-print-header {
+  display: none;
+}
+
+.empty-report {
+  text-align: center;
+  padding: 4rem;
+  color: var(--color-text-muted);
+}
+
+.report-table-wrapper {
+  overflow-x: auto;
+}
+
+.report-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.report-data-table th {
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+  text-transform: uppercase;
+}
+
+.report-data-table td {
+  padding: 1rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.monospace-cell {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.clearance-text {
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .report-workspace, .report-workspace * {
+    visibility: visible;
+  }
+  .report-workspace {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .report-print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-divider {
+    border: 0;
+    height: 1px;
+    background: #000;
+    margin: 1rem 0;
+  }
+}

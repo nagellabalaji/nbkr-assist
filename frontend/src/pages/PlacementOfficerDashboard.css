@@ -1,0 +1,307 @@
+.placement-officer-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header-actions .btn.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.publish-drive-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.admin-metrics-row .metric-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.admin-metrics-row .m-icon {
+  margin: 0 auto 0.75rem auto;
+  color: var(--color-primary);
+}
+
+.admin-metrics-row .m-val {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.admin-metrics-row .m-lbl {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.admin-metrics-row .metric-card.warning {
+  border-left: 3px solid var(--color-pending);
+}
+.admin-metrics-row .metric-card.warning .m-icon {
+  color: var(--color-pending);
+}
+
+.admin-metrics-row .metric-card.success {
+  border-left: 3px solid var(--color-resolved);
+}
+.admin-metrics-row .metric-card.success .m-icon {
+  color: var(--color-resolved);
+}
+
+.roster-controls-card {
+  padding: 1.25rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box-wrapper {
+  position: relative;
+  flex-grow: 1;
+  max-width: 500px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.status-select-filter {
+  padding: 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.table-responsive {
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.roster-table th {
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+  text-transform: uppercase;
+}
+
+.roster-table td {
+  padding: 1rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.monospace-cell {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.candidate-meta, .job-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.candidate-meta span, .job-meta span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-pill.status-applied {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.status-pill.status-shortlisted {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-pill.status-selected {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-pill.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.drive-status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.drive-status-badge.upcoming {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.drive-status-badge.ongoing {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.drive-status-badge.completed {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.actions-cell-icons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  padding: 0.45rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+.edit-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.delete-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.empty-roster {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-muted);
+}
+
+/* Modals */
+.drive-form, .status-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.modal-actions-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

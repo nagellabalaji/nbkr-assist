@@ -1,0 +1,239 @@
+/* Admin Dashboard Custom CSS Styles */
+
+.admin-dashboard-container {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.admin-header-section {
+  margin-bottom: 30px;
+}
+
+.admin-header-section h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.admin-header-section p {
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Charts Grid Styles */
+.charts-row-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.chart-card {
+  padding: 24px;
+}
+
+.chart-card h3 {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.chart-container-inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container-inner.flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pie legend styling */
+.pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Admin queues list */
+.admin-queue-card {
+  padding: 30px;
+}
+
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.queue-header h3 {
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.queue-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.queue-filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.queue-filter-row select {
+  width: auto;
+  min-width: 140px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* Table overrides and custom layout details */
+.student-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.student-cell .s-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.student-cell .s-roll {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+}
+
+.queue-id {
+  font-size: 0.8rem;
+  color: var(--secondary-hover);
+  font-family: var(--font-heading);
+}
+
+.queue-title {
+  font-weight: 500;
+  display: block;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-loc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.engineer-assigned {
+  font-weight: 600;
+  color: var(--color-resolved);
+  font-size: 0.85rem;
+}
+
+.engineer-unassigned {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.row-actions-group {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-icon-only {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+}
+
+.empty-table-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1200px) {
+  .charts-row-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .queue-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .queue-actions {
+    width: 100%;
+  }
+  .queue-actions .search-bar-wrapper {
+    width: 100%;
+  }
+  .queue-filter-row select {
+    flex: 1;
+    min-width: 110px;
+  }
+}
+
+.portal-tabs-row {
+  display: flex;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
+  padding: 4px;
+  gap: 8px;
+}
+.portal-tab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+.portal-tab-btn:hover {
+  color: var(--text-primary, #f8fafc);
+  background: rgba(255, 255, 255, 0.04);
+}
+.portal-tab-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #f8fafc);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}

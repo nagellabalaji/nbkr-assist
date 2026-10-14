@@ -1,0 +1,221 @@
+.hostel-admin-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.admin-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.admin-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.admin-metrics-row .metric-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.admin-metrics-row .m-icon {
+  margin: 0 auto 0.75rem auto;
+  color: var(--color-primary);
+}
+
+.admin-metrics-row .m-val {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.admin-metrics-row .m-lbl {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.admin-metrics-row .metric-card.warning {
+  border-left: 3px solid var(--color-pending);
+}
+.admin-metrics-row .metric-card.warning .m-icon {
+  color: var(--color-pending);
+}
+
+.admin-metrics-row .metric-card.progress {
+  border-left: 3px solid var(--color-in-progress);
+}
+.admin-metrics-row .metric-card.progress .m-icon {
+  color: var(--color-in-progress);
+}
+
+.admin-metrics-row .metric-card.success {
+  border-left: 3px solid var(--color-resolved);
+}
+.admin-metrics-row .metric-card.success .m-icon {
+  color: var(--color-resolved);
+}
+
+.roster-controls-card {
+  padding: 1.25rem;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box-wrapper {
+  position: relative;
+  flex-grow: 1;
+  max-width: 500px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.status-select-filter {
+  padding: 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.table-responsive {
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.roster-table th {
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+  text-transform: uppercase;
+}
+
+.roster-table td {
+  padding: 1rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.monospace-cell {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.student-room-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.student-room-meta span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.category-badge {
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.description-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-pill.status-submitted {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.status-pill.status-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-pill.status-resolved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-pill.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+.edit-action-btn {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+}
+
+.admin-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
