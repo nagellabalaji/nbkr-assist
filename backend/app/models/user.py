@@ -12,7 +12,8 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum(
         'student', 'faculty', 'hod', 'exam_cell', 'placement_officer',
-        'hostel_admin', 'transport_admin', 'maintenance_staff', 'librarian', 'super_admin'
+        'hostel_admin', 'transport_admin', 'maintenance_staff', 'librarian', 'super_admin',
+        'admin', 'staff'
     ), nullable=False)
     status = db.Column(db.Enum('active', 'inactive'), default='active')
     email_verified = db.Column(db.Boolean, default=True)

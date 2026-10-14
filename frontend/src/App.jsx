@@ -59,8 +59,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (user.role === 'hostel_admin') return <Navigate to="/hostel-admin" replace />;
     if (user.role === 'transport_admin') return <Navigate to="/transport-admin" replace />;
     if (user.role === 'librarian') return <Navigate to="/library-admin" replace />;
-    if (user.role === 'placement_officer') return <Navigate to="/placement-admin" replace />;
-    return <Navigate to="/student-dashboard" replace />;
+    if (user.role === 'student') return <Navigate to="/student-dashboard" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Wrap standard dashboards and sub-pages in DashboardLayout frame
@@ -361,8 +361,10 @@ const AppRoutes = () => {
               <Navigate to="/hod-dashboard" replace />
             ) : user.role === 'exam_cell' ? (
               <Navigate to="/examcell-dashboard" replace />
-            ) : (
+            ) : user.role === 'student' ? (
               <Navigate to="/student-dashboard" replace />
+            ) : (
+              <Navigate to="/login" replace />
             )
           ) : (
             <Navigate to="/login" replace />

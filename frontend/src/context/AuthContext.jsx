@@ -15,13 +15,21 @@ export const AuthProvider = ({ children }) => {
       
       if (storedUser && token) {
         try {
-          setUser(JSON.parse(storedUser));
+          let parsedUser = JSON.parse(storedUser);
+          if (!parsedUser.role && token.includes('.')) {
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              if (payload.role) parsedUser.role = payload.role;
+            } catch (err) {}
+          }
+          setUser(parsedUser);
           
           // Proactively fetch fresh profile details to sync
           const profileRes = await authService.getProfile();
-          if (profileRes.success) {
+          if (profileRes && profileRes.success) {
             const freshUser = {
-              ...JSON.parse(storedUser),
+              ...parsedUser,
+              role: profileRes.data?.role || parsedUser.role,
               profile: profileRes.data
             };
             setUser(freshUser);
