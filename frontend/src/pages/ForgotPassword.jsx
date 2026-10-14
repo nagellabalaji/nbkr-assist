@@ -82,12 +82,8 @@ export const ForgotPassword = () => {
         setStep(2);
         setTimer(60);
         setCanResend(false);
-        if (res.demo_otp) {
-          setOtpVal(res.demo_otp.split(''));
-          setToast({ show: true, message: `Verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
-        } else {
-          setToast({ show: true, message: 'Verification code dispatched to your email.', type: 'success' });
-        }
+        setOtpVal(['', '', '', '', '', '']);
+        setToast({ show: true, message: 'Verification code dispatched to your email.', type: 'success' });
       } else {
         setErrorMsg(res.message);
       }

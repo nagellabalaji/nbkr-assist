@@ -607,10 +607,33 @@
 
   .portal-tabs-row {
     padding: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
   .portal-tab-btn {
-    padding: 10px 12px;
-    font-size: 0.8rem;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-dashboard-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+  .portal-profile-header {
+    padding: 16px 12px;
+  }
+  .profile-details-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .profile-name-section h1 {
+    font-size: 1.4rem;
   }
 }

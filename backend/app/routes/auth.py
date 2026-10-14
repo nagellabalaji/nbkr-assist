@@ -154,19 +154,15 @@ def register_send_otp():
             current_app.logger.warning(f"Email dispatch exception: {str(mail_err)}")
 
         if not sent:
-            # Cloud outbound SMTP (ports 587/465) may be blocked on free tiers.
-            # Gracefully provide code so the user is never locked out of registering!
             return jsonify({
                 'success': True,
-                'message': f'Verification code generated! Code: {otp}',
-                'demo_otp': otp,
+                'message': 'Verification code sent to your email. Please check your inbox or spam folder.',
                 'email_sent': False
             }), 200
             
         return jsonify({
             'success': True,
-            'message': 'Verification code sent successfully to your email.',
-            'demo_otp': otp,
+            'message': 'Verification code sent successfully to your email. Please check your inbox.',
             'email_sent': True
         }), 200
     except Exception as e:
@@ -648,15 +644,13 @@ def forgot_password_send_otp():
             if not sent:
                 return jsonify({
                     'success': True,
-                    'message': f'Verification code generated! Code: {otp}',
-                    'demo_otp': otp,
+                    'message': 'A verification code has been dispatched to your email address.',
                     'email_sent': False
                 }), 200
             
         return jsonify({
             'success': True,
-            'message': 'If the email exists, a verification code has been dispatched.',
-            'demo_otp': otp,
+            'message': 'If the email exists, a verification code has been dispatched to your email.',
             'email_sent': True
         }), 200
     except Exception as e:

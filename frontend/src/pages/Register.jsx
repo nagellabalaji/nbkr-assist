@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/auth';
-import { GoogleLoginButton } from '../components/Auth/GoogleLoginButton';
 import { Loader } from '../components/Common/Loader';
 import { Toast } from '../components/Common/Toast';
 import './AuthPages.css';
 
 export const Register = () => {
-  const { isAuthenticated, user, loginWithGoogle, completeGoogleRegistration } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -19,9 +18,6 @@ export const Register = () => {
       else navigate('/student-dashboard');
     }
   }, [isAuthenticated, user, navigate]);
-
-  // Google OAuth registration state
-  const [googleData, setGoogleData] = useState(null);
 
   // Form Fields
   const [username, setUsername] = useState('');
@@ -40,7 +36,6 @@ export const Register = () => {
   // OTP Verification States
   const [step, setStep] = useState(1); // 1 = Registration details, 2 = OTP check
   const [otpVal, setOtpVal] = useState(['', '', '', '', '', '']);
-  const [receivedOtp, setReceivedOtp] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const otpInputsRef = useRef([]);
@@ -111,7 +106,7 @@ export const Register = () => {
   };
 
   const getPayload = () => {
-    let payload = {
+    return {
       username: username.trim(),
       email: email.trim(),
       password: password.trim(),
@@ -122,7 +117,6 @@ export const Register = () => {
       room_no: roomNo.trim() || null,
       contact_no: contactNo.trim() || null
     };
-    return payload;
   };
 
   const handleSendOtp = async (e) => {
@@ -151,14 +145,8 @@ export const Register = () => {
         setStep(2);
         setTimer(60);
         setCanResend(false);
-        if (res.demo_otp) {
-          setReceivedOtp(res.demo_otp);
-          setOtpVal(res.demo_otp.split(''));
-          setToast({ show: true, message: `Verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
-        } else {
-          setReceivedOtp('');
-          setToast({ show: true, message: 'Verification code sent successfully to your college email.', type: 'success' });
-        }
+        setOtpVal(['', '', '', '', '', '']);
+        setToast({ show: true, message: 'Verification code sent successfully to your college email.', type: 'success' });
       } else {
         setErrorMsg(res.message);
       }
@@ -209,15 +197,8 @@ export const Register = () => {
       if (res.success) {
         setTimer(60);
         setCanResend(false);
-        if (res.demo_otp) {
-          setReceivedOtp(res.demo_otp);
-          setOtpVal(res.demo_otp.split(''));
-          setToast({ show: true, message: `New verification code: ${res.demo_otp} (Auto-filled)`, type: 'success' });
-        } else {
-          setReceivedOtp('');
-          setOtpVal(['', '', '', '', '', '']);
-          setToast({ show: true, message: 'New verification code dispatched to your email.', type: 'success' });
-        }
+        setOtpVal(['', '', '', '', '', '']);
+        setToast({ show: true, message: 'New verification code dispatched to your email.', type: 'success' });
       } else {
         setErrorMsg(res.message);
       }
@@ -226,76 +207,6 @@ export const Register = () => {
     } finally {
       setLoadingLocal(false);
     }
-  };
-
-  const handleGoogleSuccess = async (credential) => {
-    setErrorMsg('');
-    setLoadingLocal(true);
-    try {
-      const result = await loginWithGoogle(credential);
-      if (result.success) {
-        if (result.needs_registration) {
-          setGoogleData(result.data);
-          setUsername(result.data.name || result.data.suggested_username || '');
-          setEmail(result.data.email || '');
-          setToast({ show: true, message: 'Google account verified! Please enter your roll number and department.', type: 'success' });
-        } else {
-          setToast({ show: true, message: 'Google authentication successful! Redirecting...', type: 'success' });
-        }
-      } else {
-        setErrorMsg(result.message || 'Google registration failed.');
-      }
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Google registration failed. Please try again.');
-    } finally {
-      setLoadingLocal(false);
-    }
-  };
-
-  const handleGoogleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-
-    if (!username.trim()) {
-      setErrorMsg('Full name / username is required.');
-      return;
-    }
-    if (!rollNo.trim()) {
-      setErrorMsg('Student ID / Roll number is required.');
-      return;
-    }
-    if (!departmentId) {
-      setErrorMsg('Please select your academic department.');
-      return;
-    }
-
-    setLoadingLocal(true);
-    try {
-      const payload = {
-        credential: googleData.credential,
-        username: username.trim(),
-        roll_no: rollNo.trim().toUpperCase(),
-        department_id: parseInt(departmentId),
-        hostel_no: hostelNo.trim() || null,
-        room_no: roomNo.trim() || null,
-        contact_no: contactNo.trim() || null
-      };
-
-      const res = await completeGoogleRegistration(payload);
-      if (res.success) {
-        setToast({ show: true, message: 'Registration completed successfully! Welcome to NBKR Assist.', type: 'success' });
-      } else {
-        setErrorMsg(res.message || 'Registration failed.');
-      }
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Error completing registration. Please try again.');
-    } finally {
-      setLoadingLocal(false);
-    }
-  };
-
-  const handleGoogleError = (err) => {
-    setErrorMsg(typeof err === 'string' ? err : 'Google sign-in was cancelled or failed.');
   };
 
   return (
@@ -321,31 +232,13 @@ export const Register = () => {
           {step === 1 ? (
             <>
               <div className="form-header">
-                <h2>{googleData ? 'Complete Student Registration' : 'Create Account'}</h2>
-                <p>{googleData ? 'Enter your student roll number and department to complete registration' : 'Sign up to access student grievances and college support desks'}</p>
+                <h2>Create Account</h2>
+                <p>Sign up to access student grievances and college support desks</p>
               </div>
-
-              {googleData && (
-                <div className="google-profile-card">
-                  {googleData.avatar_url && (
-                    <img src={googleData.avatar_url} alt="Avatar" className="google-profile-avatar" />
-                  )}
-                  <div className="google-profile-info">
-                    <span className="google-profile-name">{googleData.name}</span>
-                    <span className="google-profile-email">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#10b981" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                      {googleData.email} (Verified by Google)
-                    </span>
-                  </div>
-                </div>
-              )}
 
               {errorMsg && <div className="auth-error-banner">{errorMsg}</div>}
 
-              <form onSubmit={googleData ? handleGoogleSubmit : handleSendOtp} className="auth-form">
-
+              <form onSubmit={handleSendOtp} className="auth-form">
                 <div className="form-grid">
                   {/* Common Fields */}
                   <div className="form-group">
@@ -363,7 +256,7 @@ export const Register = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="email">College Email</label>
+                    <label htmlFor="email">College Email <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
                       id="email"
                       type="email"
@@ -371,139 +264,104 @@ export const Register = () => {
                       placeholder="name@college.edu"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={!!googleData || loadingLocal}
-                      style={googleData ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+                      disabled={loadingLocal}
                       required
                     />
                   </div>
 
-                  {!googleData && (
-                    <div className="form-group full-width">
-                      <label htmlFor="password">Password (min 6 chars)</label>
-                      <input
-                        id="password"
-                        type="password"
-                        className="form-input"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={loadingLocal}
-                        required
-                      />
-                    </div>
-                  )}
+                  <div className="form-group full-width">
+                    <label htmlFor="password">Password (min 6 chars) <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      id="password"
+                      type="password"
+                      className="form-input"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loadingLocal}
+                      required
+                    />
+                  </div>
 
                   {/* Student Specific Fields */}
-                  {role === 'student' && (
-                    <>
-                      <div className="form-group">
-                        <label htmlFor="rollNo">Student ID / Roll No <span style={{ color: '#ef4444' }}>*</span></label>
-                        <input
-                          id="rollNo"
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. 21CS104"
-                          value={rollNo}
-                          onChange={(e) => setRollNo(e.target.value)}
-                          disabled={loadingLocal}
-                          required
-                        />
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="rollNo">Student ID / Roll No <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      id="rollNo"
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. 21CS104"
+                      value={rollNo}
+                      onChange={(e) => setRollNo(e.target.value)}
+                      disabled={loadingLocal}
+                      required
+                    />
+                  </div>
 
-                      <div className="form-group">
-                        <label htmlFor="departmentId">Academic Department <span style={{ color: '#ef4444' }}>*</span></label>
-                        <select
-                          id="departmentId"
-                          className="form-input"
-                          value={departmentId}
-                          onChange={(e) => setDepartmentId(e.target.value)}
-                          disabled={loadingLocal}
-                          required
-                        >
-                          {departmentsList.map((dept) => (
-                            <option key={dept.id} value={dept.id}>
-                              {dept.name} ({dept.code})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="departmentId">Academic Department <span style={{ color: '#ef4444' }}>*</span></label>
+                    <select
+                      id="departmentId"
+                      className="form-input"
+                      value={departmentId}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                      disabled={loadingLocal}
+                      required
+                    >
+                      {departmentsList.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                          {dept.name} ({dept.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                      <div className="form-group">
-                        <label htmlFor="hostelNo">Hostel Name (Optional)</label>
-                        <input
-                          id="hostelNo"
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. Ramanujan Hall"
-                          value={hostelNo}
-                          onChange={(e) => setHostelNo(e.target.value)}
-                          disabled={loadingLocal}
-                        />
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="hostelNo">Hostel Name (Optional)</label>
+                    <input
+                      id="hostelNo"
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Ramanujan Hall"
+                      value={hostelNo}
+                      onChange={(e) => setHostelNo(e.target.value)}
+                      disabled={loadingLocal}
+                    />
+                  </div>
 
-                      <div className="form-group">
-                        <label htmlFor="roomNo">Room No (Optional)</label>
-                        <input
-                          id="roomNo"
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. A-302"
-                          value={roomNo}
-                          onChange={(e) => setRoomNo(e.target.value)}
-                          disabled={loadingLocal}
-                        />
-                      </div>
+                  <div className="form-group">
+                    <label htmlFor="roomNo">Room No (Optional)</label>
+                    <input
+                      id="roomNo"
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. A-302"
+                      value={roomNo}
+                      onChange={(e) => setRoomNo(e.target.value)}
+                      disabled={loadingLocal}
+                    />
+                  </div>
 
-                      <div className="form-group full-width">
-                        <label htmlFor="contactNo">Contact Number (Optional)</label>
-                        <input
-                          id="contactNo"
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. +91 9876543210"
-                          value={contactNo}
-                          onChange={(e) => setContactNo(e.target.value)}
-                          disabled={loadingLocal}
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div className="form-group full-width">
+                    <label htmlFor="contactNo">Contact Number (Optional)</label>
+                    <input
+                      id="contactNo"
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. +91 9876543210"
+                      value={contactNo}
+                      onChange={(e) => setContactNo(e.target.value)}
+                      disabled={loadingLocal}
+                    />
+                  </div>
                 </div>
 
                 <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '24px' }} disabled={loadingLocal}>
-                  {loadingLocal ? <Loader size="small" /> : (googleData ? 'Complete Registration & Enter' : 'Send Verification OTP')}
+                  {loadingLocal ? <Loader size="small" /> : 'Send Verification OTP'}
                 </button>
-
-                {googleData && (
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-block"
-                    onClick={() => { setGoogleData(null); setUsername(''); setEmail(''); }}
-                    disabled={loadingLocal}
-                    style={{ marginTop: '12px' }}
-                  >
-                    Cancel Google Sign-up
-                  </button>
-                )}
               </form>
 
-              {!googleData && (
-                <>
-                  <div className="auth-divider">
-                    <div className="auth-divider-line"></div>
-                    <span className="auth-divider-text">Or register with</span>
-                    <div className="auth-divider-line"></div>
-                  </div>
-
-                  <GoogleLoginButton
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    disabled={loadingLocal}
-                  />
-                </>
-              )}
-
-              <div className="auth-footer">
+              <div className="auth-footer" style={{ marginTop: '24px' }}>
                 <p>Already have an account? <Link to="/login">Log In</Link></p>
               </div>
             </>
@@ -511,29 +369,8 @@ export const Register = () => {
             <>
               <div className="form-header">
                 <h2>Email Verification Required</h2>
-                <p>A cryptographically secure 6-digit OTP verification code has been dispatched to: <strong style={{ color: 'var(--secondary-hover)' }}>{email}</strong></p>
+                <p>We have sent a 6-digit verification code to your email: <strong style={{ color: 'var(--secondary-hover)' }}>{email}</strong></p>
               </div>
-
-              {receivedOtp && (
-                <div style={{
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid #10b981',
-                  borderRadius: '10px',
-                  padding: '16px',
-                  marginBottom: '20px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: '0.85rem', color: '#047857', fontWeight: '600' }}>
-                    Instant Verification Code (Auto-Detected):
-                  </div>
-                  <div style={{ fontSize: '2.25rem', fontWeight: '800', letterSpacing: '8px', color: '#047857', margin: '4px 0' }}>
-                    {receivedOtp}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#065f46' }}>
-                    Your code is auto-filled below. Click &quot;Verify &amp; Create Account&quot; to complete registration!
-                  </div>
-                </div>
-              )}
 
               {errorMsg && <div className="auth-error-banner">{errorMsg}</div>}
 
@@ -587,7 +424,7 @@ export const Register = () => {
                   onClick={() => setStep(1)}
                   style={{ marginTop: '16px' }}
                 >
-                  Back to Details
+                  Back to Registration
                 </button>
               </form>
             </>
@@ -608,4 +445,5 @@ export const Register = () => {
     </div>
   );
 };
+
 export default Register;

@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authService } from '../services/auth';
-import { GoogleLoginButton } from '../components/Auth/GoogleLoginButton';
 import { Loader } from '../components/Common/Loader';
 import { Toast } from '../components/Common/Toast';
 import './AuthPages.css';
 
 export const Login = () => {
-  const { login, loginVerifyOtp, loginWithGoogle, completeGoogleRegistration, isAuthenticated, user } = useAuth();
+  const { login, loginVerifyOtp, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,23 +22,12 @@ export const Login = () => {
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   
-  // Login OTP & Google Registration step states
-  // 1 = username/password, 2 = OTP check, 3 = Google Complete Registration
+  // Login OTP step states: 1 = username/password, 2 = OTP check
   const [step, setStep] = useState(1);
   const [otpVal, setOtpVal] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const otpInputsRef = useRef([]);
-
-  // Google Registration Specific States
-  const [googleData, setGoogleData] = useState(null);
-  const [regFullName, setRegFullName] = useState('');
-  const [regRollNo, setRegRollNo] = useState('');
-  const [departmentsList, setDepartmentsList] = useState([]);
-  const [regDepartmentId, setRegDepartmentId] = useState('');
-  const [regHostelNo, setRegHostelNo] = useState('');
-  const [regRoomNo, setRegRoomNo] = useState('');
-  const [regContactNo, setRegContactNo] = useState('');
 
   const [loadingLocal, setLoadingLocal] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -116,7 +103,15 @@ export const Login = () => {
     try {
       const result = await login(identity.trim(), password.trim());
       if (result.success) {
-        setSuccessMsg('Access approved! Welcome back.');
+        if (result.require_otp) {
+          setStep(2);
+          setTimer(60);
+          setCanResend(false);
+          setOtpVal(['', '', '', '', '', '']);
+          setSuccessMsg('Verification code sent to your email.');
+        } else {
+          setSuccessMsg('Access approved! Welcome back.');
+        }
       } else {
         setErrorMsg(result.message || 'Authentication failed.');
       }
@@ -143,7 +138,6 @@ export const Login = () => {
       const result = await loginVerifyOtp(identity.trim(), password.trim(), otpCode);
       if (result.success) {
         setSuccessMsg('Access approved! Welcome back.');
-        // Context state will auto-redirect in useEffect
       } else {
         setErrorMsg(result.message || 'OTP verification failed.');
       }
@@ -175,98 +169,6 @@ export const Login = () => {
     } finally {
       setLoadingLocal(false);
     }
-  };
-
-  // Load departments list when Google registration step is active
-  useEffect(() => {
-    const loadDepts = async () => {
-      try {
-        const res = await authService.getDepartments();
-        if (res.success && res.data.length > 0) {
-          setDepartmentsList(res.data);
-          if (!regDepartmentId) {
-            setRegDepartmentId(res.data[0].id.toString());
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load departments list:', err);
-      }
-    };
-    if (step === 3 && departmentsList.length === 0) {
-      loadDepts();
-    }
-  }, [step, departmentsList.length, regDepartmentId]);
-
-  const handleGoogleSuccess = async (credential) => {
-    setErrorMsg('');
-    setSuccessMsg('');
-    setLoadingLocal(true);
-    try {
-      const result = await loginWithGoogle(credential);
-      if (result.success) {
-        if (result.needs_registration) {
-          setGoogleData(result.data);
-          setRegFullName(result.data.name || result.data.suggested_username || '');
-          setStep(3);
-          setSuccessMsg('Google account verified! Please enter your student details to complete registration.');
-        } else {
-          setSuccessMsg('Google sign-in approved! Welcome back.');
-        }
-      } else {
-        setErrorMsg(result.message || 'Google sign-in failed.');
-      }
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Google sign-in failed. Please try again.');
-    } finally {
-      setLoadingLocal(false);
-    }
-  };
-
-  const handleCompleteGoogleRegistration = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    if (!regFullName.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
-    if (!regRollNo.trim()) {
-      setErrorMsg('Student ID / Roll Number is required.');
-      return;
-    }
-    if (!regDepartmentId) {
-      setErrorMsg('Please select your academic department.');
-      return;
-    }
-
-    setLoadingLocal(true);
-    try {
-      const payload = {
-        credential: googleData.credential,
-        username: regFullName.trim(),
-        roll_no: regRollNo.trim().toUpperCase(),
-        department_id: parseInt(regDepartmentId),
-        hostel_no: regHostelNo.trim() || null,
-        room_no: regRoomNo.trim() || null,
-        contact_no: regContactNo.trim() || null
-      };
-
-      const result = await completeGoogleRegistration(payload);
-      if (result.success) {
-        setSuccessMsg('Registration completed successfully! Welcome to NBKR Assist.');
-      } else {
-        setErrorMsg(result.message || 'Registration failed.');
-      }
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Error completing registration. Please check your details.');
-    } finally {
-      setLoadingLocal(false);
-    }
-  };
-
-  const handleGoogleError = (err) => {
-    setErrorMsg(typeof err === 'string' ? err : 'Google sign-in was cancelled or failed.');
   };
 
   return (
@@ -335,23 +237,11 @@ export const Login = () => {
                 </button>
               </form>
 
-              <div className="auth-divider">
-                <div className="auth-divider-line"></div>
-                <span className="auth-divider-text">Or continue with</span>
-                <div className="auth-divider-line"></div>
-              </div>
-
-              <GoogleLoginButton
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                disabled={loadingLocal}
-              />
-
-              <div className="form-footer">
+              <div className="form-footer" style={{ marginTop: '24px' }}>
                 <p>New to the platform? <Link to="/register" className="auth-link">Create Account</Link></p>
               </div>
             </>
-          ) : step === 2 ? (
+          ) : (
             <>
               <div className="form-header">
                 <h2>Two-Step Verification</h2>
@@ -382,10 +272,10 @@ export const Login = () => {
                   disabled={loadingLocal}
                   style={{ marginTop: '30px' }}
                 >
-                  {loadingLocal ? <Loader size="small" /> : 'Verify & Approve Login'}
+                  {loadingLocal ? <Loader size="small" /> : 'Confirm & Authenticate'}
                 </button>
 
-                <div className="otp-resend-wrapper" style={{ marginTop: '20px', textAlign: 'center' }}>
+                <div className="otp-resend-wrapper" style={{ marginTop: '20px', textItems: 'center', textAlign: 'center' }}>
                   {canResend ? (
                     <button 
                       type="button" 
@@ -412,150 +302,6 @@ export const Login = () => {
                 </button>
               </form>
             </>
-          ) : (
-            <>
-              <div className="form-header">
-                <h2>Complete Student Registration</h2>
-                <p>Please enter your student details to finish creating your account</p>
-              </div>
-
-              {googleData && (
-                <div className="google-profile-card">
-                  {googleData.avatar_url && (
-                    <img src={googleData.avatar_url} alt="Avatar" className="google-profile-avatar" />
-                  )}
-                  <div className="google-profile-info">
-                    <span className="google-profile-name">{googleData.name}</span>
-                    <span className="google-profile-email">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#10b981" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                      {googleData.email} (Verified by Google)
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <form onSubmit={handleCompleteGoogleRegistration} className="auth-form">
-                <div className="form-group">
-                  <label htmlFor="regFullName">Full Name <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input
-                    id="regFullName"
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. John Doe"
-                    value={regFullName}
-                    onChange={(e) => setRegFullName(e.target.value)}
-                    disabled={loadingLocal}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="regEmail">College Email</label>
-                  <input
-                    id="regEmail"
-                    type="email"
-                    className="form-input"
-                    value={googleData?.email || ''}
-                    disabled
-                    style={{ opacity: 0.7, cursor: 'not-allowed' }}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="regRollNo">Student ID / Roll No <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input
-                    id="regRollNo"
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. 21CS104"
-                    value={regRollNo}
-                    onChange={(e) => setRegRollNo(e.target.value)}
-                    disabled={loadingLocal}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="regDepartmentId">Academic Department <span style={{ color: '#ef4444' }}>*</span></label>
-                  <select
-                    id="regDepartmentId"
-                    className="form-input"
-                    value={regDepartmentId}
-                    onChange={(e) => setRegDepartmentId(e.target.value)}
-                    disabled={loadingLocal}
-                    required
-                  >
-                    {departmentsList.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name} ({dept.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="regHostelNo">Hostel Name (Optional)</label>
-                    <input
-                      id="regHostelNo"
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Ramanujan Hall"
-                      value={regHostelNo}
-                      onChange={(e) => setRegHostelNo(e.target.value)}
-                      disabled={loadingLocal}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="regRoomNo">Room No (Optional)</label>
-                    <input
-                      id="regRoomNo"
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. A-302"
-                      value={regRoomNo}
-                      onChange={(e) => setRegRoomNo(e.target.value)}
-                      disabled={loadingLocal}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="regContactNo">Contact Number (Optional)</label>
-                  <input
-                    id="regContactNo"
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. +91 9876543210"
-                    value={regContactNo}
-                    onChange={(e) => setRegContactNo(e.target.value)}
-                    disabled={loadingLocal}
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="btn btn-primary btn-block" 
-                  disabled={loadingLocal}
-                  style={{ marginTop: '20px' }}
-                >
-                  {loadingLocal ? <Loader size="small" /> : 'Complete Registration & Enter'}
-                </button>
-
-                <button 
-                  type="button" 
-                  className="btn btn-secondary btn-block"
-                  onClick={() => { setStep(1); setGoogleData(null); }}
-                  disabled={loadingLocal}
-                  style={{ marginTop: '12px' }}
-                >
-                  Cancel
-                </button>
-              </form>
-            </>
           )}
         </div>
         <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
@@ -568,4 +314,5 @@ export const Login = () => {
     </div>
   );
 };
+
 export default Login;
