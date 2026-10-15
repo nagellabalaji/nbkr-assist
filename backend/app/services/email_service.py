@@ -21,22 +21,43 @@ class EmailService:
             current_app.logger.info(f"EMAIL_MOCKED | To: {to_email} | Purpose: {purpose_text} | (OTP Code hidden for security)")
             return True
 
-        api_key = current_app.config.get('EMAIL_API_KEY')
-        email_from = current_app.config.get('EMAIL_FROM') or os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
+        api_key = current_app.config.get('EMAIL_API_KEY') or os.environ.get('EMAIL_API_KEY') or os.environ.get('RESEND_API_KEY')
+        email_from = (
+            current_app.config.get('MAIL_DEFAULT_SENDER') or 
+            current_app.config.get('EMAIL_FROM') or 
+            os.environ.get('MAIL_DEFAULT_SENDER') or 
+            os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
+        )
         
-        smtp_server = current_app.config.get('SMTP_SERVER') or os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-        smtp_username = current_app.config.get('SMTP_USERNAME') or os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
-        smtp_password = current_app.config.get('SMTP_PASSWORD') or os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
-        smtp_port = int(current_app.config.get('SMTP_PORT') or os.environ.get('SMTP_PORT', 587))
+        smtp_server = (
+            current_app.config.get('MAIL_SERVER') or 
+            current_app.config.get('SMTP_SERVER') or 
+            os.environ.get('MAIL_SERVER') or 
+            os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+        )
+        smtp_username = (
+            current_app.config.get('MAIL_USERNAME') or 
+            current_app.config.get('SMTP_USERNAME') or 
+            os.environ.get('MAIL_USERNAME') or 
+            os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
+        )
+        smtp_password = (
+            current_app.config.get('MAIL_PASSWORD') or 
+            current_app.config.get('SMTP_PASSWORD') or 
+            os.environ.get('MAIL_PASSWORD') or 
+            os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
+        )
+        
+        raw_port = (
+            current_app.config.get('MAIL_PORT') or 
+            current_app.config.get('SMTP_PORT') or 
+            os.environ.get('MAIL_PORT') or 
+            os.environ.get('SMTP_PORT', 587)
+        )
+        smtp_port = int(raw_port)
 
-        # Log started event (do not log the raw OTP code!)
-        method = "Unconfigured"
-        if api_key:
-            method = "Resend API"
-        elif smtp_server:
-            method = "SMTP Relay"
-        
-        current_app.logger.info(f"EMAIL_SEND_STARTED | To: {to_email} | Purpose: {purpose_text} | Method: {method}")
+        masked_to = to_email[:3] + '***@' + to_email.split('@')[-1] if '@' in to_email else '***'
+        current_app.logger.info(f"EMAIL_SEND_STARTED | To: {masked_to} | Purpose: {purpose_text}")
 
         # Deliverability optimized subject line
         subject = "NBKR Assist - Your Verification Code"
@@ -209,13 +230,44 @@ NBKRIST Student Support & Grievance Cell
 </html>
 """
 
-        # 3. Resend API Mode
-        if api_key:
+        brevo_key = current_app.config.get('BREVO_API_KEY') or os.environ.get('BREVO_API_KEY')
+        resend_key = current_app.config.get('RESEND_API_KEY') or current_app.config.get('EMAIL_API_KEY') or os.environ.get('RESEND_API_KEY') or os.environ.get('EMAIL_API_KEY')
+
+        # 1. Brevo REST API Mode (HTTPS port 443 — works everywhere including Render)
+        if brevo_key:
+            try:
+                res = requests.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={
+                        "api-key": brevo_key,
+                        "Content-Type": "application/json",
+                        "accept": "application/json"
+                    },
+                    json={
+                        "sender": {"name": "NBKR Assist", "email": email_from},
+                        "to": [{"email": to_email, "name": user_name}],
+                        "subject": subject,
+                        "htmlContent": html_content,
+                        "textContent": text_content
+                    },
+                    timeout=12
+                )
+                if res.status_code in [200, 201]:
+                    current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {masked_to} | Provider: Brevo API")
+                    return True
+                else:
+                    error_msg = f"Brevo API error: {res.status_code} - {res.text}"
+                    current_app.logger.error(f"EMAIL_SEND_FAILED | To: {masked_to} | Error: {error_msg}")
+            except Exception as e:
+                current_app.logger.error(f"EMAIL_SEND_FAILED | To: {masked_to} | Error: {str(e)}")
+
+        # 2. Resend REST API Mode (HTTPS port 443 — works everywhere including Render)
+        if resend_key:
             try:
                 res = requests.post(
                     "https://api.resend.com/emails",
                     headers={
-                        "Authorization": f"Bearer {api_key}",
+                        "Authorization": f"Bearer {resend_key}",
                         "Content-Type": "application/json"
                     },
                     json={
@@ -228,42 +280,64 @@ NBKRIST Student Support & Grievance Cell
                     timeout=10
                 )
                 if res.status_code in [200, 201]:
-                    current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {to_email} | Provider: Resend API")
+                    current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {masked_to} | Provider: Resend API")
                     return True
                 else:
                     error_msg = f"Resend API error status: {res.status_code}, response: {res.text}"
-                    current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {error_msg}")
-                    return False
+                    current_app.logger.error(f"EMAIL_SEND_FAILED | To: {masked_to} | Error: {error_msg}")
             except Exception as e:
-                current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {str(e)}")
-                return False
+                current_app.logger.error(f"EMAIL_SEND_FAILED | To: {masked_to} | Error: {str(e)}")
 
-        # 4. SMTP Mode
+        # 3. SMTP Mode (with SSL / TLS and automatic port fallback — for localhost)
         if smtp_server and smtp_username and smtp_password:
-            try:
-                msg = MIMEMultipart("alternative")
-                msg["Subject"] = subject
-                msg["From"] = f"NBKR Assist <{email_from}>"
-                msg["To"] = to_email
-                msg["Date"] = formatdate(localtime=True)
-                msg["Message-ID"] = make_msgid(domain='nbkrist.org')
-                
-                # Add proper MIME parts
-                part_text = MIMEText(text_content, "plain")
-                part_html = MIMEText(html_content, "html")
-                msg.attach(part_text)
-                msg.attach(part_html)
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"NBKR Assist <{email_from}>"
+            msg["To"] = to_email
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid(domain='nbkrist.org')
+            
+            part_text = MIMEText(text_content, "plain")
+            part_html = MIMEText(html_content, "html")
+            msg.attach(part_text)
+            msg.attach(part_html)
 
-                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
-                    server.starttls()
-                    server.login(smtp_username, smtp_password)
-                    server.sendmail(email_from, to_email, msg.as_string())
-                
-                current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {to_email} | Provider: SMTP Relay")
-                return True
-            except Exception as e:
-                current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {str(e)}")
-                return False
+            # Determine primary and fallback ports
+            use_ssl = (
+                str(current_app.config.get('MAIL_USE_SSL', '')).lower() in ['true', '1'] or 
+                smtp_port == 465
+            )
+            
+            ports_to_try = [(465, True), (587, False)] if use_ssl else [(smtp_port, False), (465, True)]
+            # Deduplicate
+            seen_ports = []
+            final_ports = []
+            for p, s in ports_to_try:
+                if p not in seen_ports:
+                    seen_ports.append(p)
+                    final_ports.append((p, s))
+
+            last_error = None
+            for p, ssl_mode in final_ports:
+                try:
+                    if ssl_mode or p == 465:
+                        with smtplib.SMTP_SSL(smtp_server, p, timeout=15) as server:
+                            server.login(smtp_username, smtp_password)
+                            server.sendmail(email_from, to_email, msg.as_string())
+                    else:
+                        with smtplib.SMTP(smtp_server, p, timeout=15) as server:
+                            server.starttls()
+                            server.login(smtp_username, smtp_password)
+                            server.sendmail(email_from, to_email, msg.as_string())
+                    
+                    current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {masked_to} | Provider: SMTP Relay (Port {p})")
+                    return True
+                except Exception as port_err:
+                    last_error = port_err
+                    current_app.logger.warning(f"SMTP port {p} attempt failed: {str(port_err)}. Trying fallback...")
+
+            current_app.logger.error(f"EMAIL_SEND_FAILED | To: {masked_to} | Final Error: {str(last_error)}")
+            return False
 
         # 5. Unconfigured Error
         err_msg = "No email provider credentials configured (EMAIL_API_KEY and SMTP settings are empty)."
@@ -320,13 +394,44 @@ NBKRIST Student Support & Grievance Cell
 </body>
 </html>"""
 
-        # 1. Resend API Mode
-        if api_key:
+        brevo_key = current_app.config.get('BREVO_API_KEY') or os.environ.get('BREVO_API_KEY')
+        resend_key = current_app.config.get('RESEND_API_KEY') or current_app.config.get('EMAIL_API_KEY') or os.environ.get('RESEND_API_KEY') or os.environ.get('EMAIL_API_KEY')
+
+        # 1. Brevo REST API Mode
+        if brevo_key:
+            try:
+                res = requests.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={
+                        "api-key": brevo_key,
+                        "Content-Type": "application/json",
+                        "accept": "application/json"
+                    },
+                    json={
+                        "sender": {"name": "NBKR Assist", "email": email_from},
+                        "to": [{"email": to_email, "name": "Admin Test"}],
+                        "subject": subject,
+                        "htmlContent": html_content,
+                        "textContent": text_content
+                    },
+                    timeout=12
+                )
+                if res.status_code in [200, 201]:
+                    current_app.logger.info(f"EMAIL_SEND_SUCCESS | To: {to_email} | Provider: Brevo API")
+                    return True
+                else:
+                    error_msg = f"Brevo API error status: {res.status_code}, response: {res.text}"
+                    current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {error_msg}")
+            except Exception as e:
+                current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {str(e)}")
+
+        # 2. Resend API Mode
+        if resend_key:
             try:
                 res = requests.post(
                     "https://api.resend.com/emails",
                     headers={
-                        "Authorization": f"Bearer {api_key}",
+                        "Authorization": f"Bearer {resend_key}",
                         "Content-Type": "application/json"
                     },
                     json={
@@ -344,12 +449,10 @@ NBKRIST Student Support & Grievance Cell
                 else:
                     error_msg = f"Resend API error status: {res.status_code}, response: {res.text}"
                     current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {error_msg}")
-                    return False
             except Exception as e:
                 current_app.logger.error(f"EMAIL_SEND_FAILED | To: {to_email} | Error: {str(e)}")
-                return False
 
-        # 2. SMTP Mode
+        # 3. SMTP Mode
         if smtp_server and smtp_username and smtp_password:
             try:
                 msg = MIMEMultipart("alternative")

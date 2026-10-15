@@ -34,8 +34,10 @@ class Config:
     # JWT configuration
     JWT_ACCESS_TOKEN_EXPIRES = 3600 * 24 * 7 # 7 days for development/demo ease
 
-    # Email & OTP configurations
+    # Email & OTP configurations (HTTPS API keys for cloud deployment like Render)
     EMAIL_API_KEY = os.environ.get('EMAIL_API_KEY', None)
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', None)
+    BREVO_API_KEY = os.environ.get('BREVO_API_KEY', None)
     EMAIL_FROM = os.environ.get('EMAIL_FROM', 'startupwithus2932@gmail.com')
     OTP_EXPIRY_MINUTES = int(os.environ.get('OTP_EXPIRY_MINUTES', 5))
     OTP_RESEND_COOLDOWN = int(os.environ.get('OTP_RESEND_COOLDOWN', 60))

@@ -852,46 +852,20 @@ def test_email():
     if not to_email or not re.match(EMAIL_REGEX, to_email):
         return jsonify({'success': False, 'message': 'A valid test email address is required.', 'error': 'invalid_email'}), 400
 
+    # Test via EmailService (which checks Brevo API, Resend API, and SMTP)
+    sent = EmailService.send_test_email(
+        to_email,
+        "NBKR Assist — Diagnostic Test Email",
+        "Your NBKR Assist email system is working properly!"
+    )
+    if sent:
+        return jsonify({'success': True, 'message': f'Test email dispatched successfully to {to_email}'}), 200
+
     diagnostics = {}
-    import smtplib
-    from email.mime.text import MIMEText
-
-    smtp_user = current_app.config.get('MAIL_USERNAME') or current_app.config.get('SMTP_USERNAME') or os.environ.get('MAIL_USERNAME')
-    smtp_pass = current_app.config.get('MAIL_PASSWORD') or current_app.config.get('SMTP_PASSWORD') or os.environ.get('MAIL_PASSWORD')
-    smtp_server = current_app.config.get('MAIL_SERVER') or 'smtp.gmail.com'
-
-    diagnostics['username_configured'] = bool(smtp_user)
-    diagnostics['password_configured'] = bool(smtp_pass)
-    diagnostics['server'] = smtp_server
-
-    # Try port 587
-    try:
-        with smtplib.SMTP(smtp_server, 587, timeout=10) as s:
-            s.ehlo()
-            s.starttls()
-            s.login(smtp_user, smtp_pass)
-            msg = MIMEText('Test email from NBKR Assist on Render')
-            msg['Subject'] = 'Test Email (587)'
-            msg['From'] = f"NBKR Assist <{smtp_user}>"
-            msg['To'] = to_email
-            s.sendmail(smtp_user, to_email, msg.as_string())
-        return jsonify({'success': True, 'port': 587, 'message': f'Successfully sent via port 587 to {to_email}'}), 200
-    except Exception as e587:
-        diagnostics['port_587_error'] = str(e587)
-
-    # Try port 465 (SSL)
-    try:
-        with smtplib.SMTP_SSL(smtp_server, 465, timeout=10) as s:
-            s.ehlo()
-            s.login(smtp_user, smtp_pass)
-            msg = MIMEText('Test email from NBKR Assist on Render')
-            msg['Subject'] = 'Test Email (465)'
-            msg['From'] = f"NBKR Assist <{smtp_user}>"
-            msg['To'] = to_email
-            s.sendmail(smtp_user, to_email, msg.as_string())
-        return jsonify({'success': True, 'port': 465, 'message': f'Successfully sent via port 465 to {to_email}'}), 200
-    except Exception as e465:
-        diagnostics['port_465_error'] = str(e465)
+    diagnostics['brevo_configured'] = bool(current_app.config.get('BREVO_API_KEY') or os.environ.get('BREVO_API_KEY'))
+    diagnostics['resend_configured'] = bool(current_app.config.get('RESEND_API_KEY') or current_app.config.get('EMAIL_API_KEY') or os.environ.get('RESEND_API_KEY') or os.environ.get('EMAIL_API_KEY'))
+    diagnostics['smtp_user_configured'] = bool(current_app.config.get('MAIL_USERNAME') or current_app.config.get('SMTP_USERNAME'))
+    diagnostics['note'] = 'Render free tier blocks SMTP ports 587/465. Use BREVO_API_KEY or RESEND_API_KEY (HTTPS port 443).'
 
     return jsonify({'success': False, 'error': 'email_delivery_failed', 'diagnostics': diagnostics}), 500
 
