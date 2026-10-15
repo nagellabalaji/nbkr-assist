@@ -20,10 +20,17 @@ def create_app(config_class=Config):
     # Initialize extensions with app
     db.init_app(app)
     jwt.init_app(app)
-    # Load dynamic CORS origins from environment config, defaulting to dev URL
-    cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173')
+    # Load dynamic CORS origins from environment config
+    # Always include GitHub Pages and localhost as defaults
+    cors_origins = os.getenv(
+        'CORS_ORIGINS',
+        'https://nagellabalaji.github.io,http://localhost:5173,http://127.0.0.1:5173'
+    )
     allowed_origins = [o.strip() for o in cors_origins.split(',') if o.strip()]
-    cors.init_app(app, resources={r"/api/*": {"origins": allowed_origins}})
+    # Always ensure GitHub Pages is allowed regardless of env var content
+    if 'https://nagellabalaji.github.io' not in allowed_origins:
+        allowed_origins.append('https://nagellabalaji.github.io')
+    cors.init_app(app, resources={r"/api/*": {"origins": allowed_origins, "supports_credentials": True}})
 
     # Register blueprints (routes will be defined in Phase 4)
     from app.routes.auth import auth_bp
