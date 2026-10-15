@@ -40,9 +40,23 @@ class Config:
     OTP_EXPIRY_MINUTES = int(os.environ.get('OTP_EXPIRY_MINUTES', 5))
     OTP_RESEND_COOLDOWN = int(os.environ.get('OTP_RESEND_COOLDOWN', 60))
     
-    # SMTP fallback configurations
-    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-    SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+    # MAIL_* keys — primary names used by email_service.py
+    MAIL_SERVER   = os.environ.get('MAIL_SERVER')   or os.environ.get('SMTP_SERVER',   'smtp.gmail.com')
+    MAIL_PORT     = int(os.environ.get('MAIL_PORT') or os.environ.get('SMTP_PORT',     587))
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
+    MAIL_DEFAULT_SENDER = (
+        os.environ.get('MAIL_DEFAULT_SENDER') or
+        os.environ.get('EMAIL_FROM') or
+        os.environ.get('SMTP_USERNAME') or
+        'startupwithus2932@gmail.com'
+    )
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+
+    # Legacy SMTP_* keys (kept for backward compat)
+    SMTP_SERVER   = os.environ.get('SMTP_SERVER',   'smtp.gmail.com')
+    SMTP_PORT     = int(os.environ.get('SMTP_PORT', 587))
     SMTP_USERNAME = os.environ.get('SMTP_USERNAME', 'startupwithus2932@gmail.com')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'daqkbmxqmwofslsh')
 
